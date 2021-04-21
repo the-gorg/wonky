@@ -8,7 +8,6 @@ pub struct Boopie {
     animation: Option<BoopieAnimation>,
     x: u16,
     y: u16,
-    fps: u64,
     frame: usize,
 }
 
@@ -21,10 +20,10 @@ impl Boopie {
             x,
             y,
             frame: 0,
-            fps: 1,
             animation: None,
         }
     }
+
     pub fn animation(&self) -> &Option<BoopieAnimation> {
         &self.animation
     }
@@ -34,11 +33,36 @@ impl Boopie {
         self.animation = Some(animation)
     }
 
+    pub fn speak(&mut self, text: &str) {
+        let frames: Vec<String> = "+(⋅-⋅ )+(⋅o⋅ )"
+            .to_string()
+            .repeat(text.len() / 2)
+            .split('+')
+            .map(|s| s.to_string())
+            .skip(1)
+            .collect();
+
+        let mut speech_text = text.to_string();
+        let mut speech: Vec<String> = Vec::new();
+
+        while !speech_text.is_empty() {
+            let last_frame = match speech.last() {
+                Some(s) => s.to_owned(),
+                None => "".to_string(),
+            };
+            speech.push(last_frame + &speech_text.drain(0..1).collect::<String>());
+        }
+
+        let animation = BoopieAnimation {
+            frames,
+            speech: Some(speech),
+        };
+        self.play_animation(animation)
+    }
+
     pub fn update(&mut self, viewport: &mut Viewport) {
         match &self.animation {
             Some(animation) => {
-                self.fps = animation.fps;
-
                 let animation_complete = match self.frame {
                     n if n < animation.frames.len() => {
                         let frame =
@@ -124,7 +148,6 @@ impl Boopie {
 pub struct BoopieAnimation {
     frames: Vec<String>,
     speech: Option<Vec<String>>,
-    fps: u64,
 }
 
 impl BoopieAnimation {
@@ -151,7 +174,6 @@ impl BoopieAnimation {
         Self {
             frames,
             speech: Some(speech),
-            fps: 5,
         }
     }
 
@@ -174,7 +196,6 @@ impl BoopieAnimation {
         Self {
             frames,
             speech: None,
-            fps: 5,
         }
     }
     pub fn sleep() -> Self {
@@ -189,7 +210,6 @@ impl BoopieAnimation {
         Self {
             frames,
             speech: Some(speech),
-            fps: 5,
         }
     }
     pub fn sleep_alt() -> Self {
@@ -213,7 +233,6 @@ impl BoopieAnimation {
         Self {
             frames,
             speech: None,
-            fps: 5,
         }
     }
 }
