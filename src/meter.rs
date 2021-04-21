@@ -83,10 +83,12 @@ impl Meter {
     }
 }
 
+#[allow(dead_code)]
 fn fg_color() -> Option<Color> {
     Some(Color::Green)
 }
 
+#[allow(dead_code)]
 fn bg_color() -> Option<Color> {
     Some(Color::DarkGreen)
 }
