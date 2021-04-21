@@ -138,7 +138,7 @@ impl BoopieAnimation {
 
         let mut speech = Vec::new();
         speech.push("".to_string());
-        speech.push("Hel".to_string());
+        speech.push("He".to_string());
         speech.push("Hello!".to_string());
         speech.push("Hello!".to_string());
         speech.push("Hello!".to_string());
