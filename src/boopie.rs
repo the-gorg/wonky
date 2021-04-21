@@ -34,12 +34,10 @@ impl Boopie {
     }
 
     pub fn speak(&mut self, text: &str) {
-        let frames: Vec<String> = "+(⋅-⋅ )+(⋅o⋅ )"
-            .to_string()
-            .repeat(text.len() / 2)
-            .split('+')
-            .map(|s| s.to_string())
-            .skip(1)
+        let frames: Vec<&str> = vec!["(⋅-⋅ )", "(⋅o⋅ )"]
+            .into_iter()
+            .cycle()
+            .take(text.len())
             .collect();
 
         let mut speech_text = text.to_string();
@@ -55,6 +53,7 @@ impl Boopie {
             frames,
             speech: Some(speech),
         };
+
         self.play_animation(animation)
     }
 
@@ -144,18 +143,18 @@ impl Boopie {
 }
 
 pub struct BoopieAnimation {
-    frames: Vec<String>,
+    frames: Vec<&'static str>,
     speech: Option<Vec<String>>,
 }
 
 impl BoopieAnimation {
     pub fn hello() -> Self {
         let mut frames = Vec::new();
-        frames.push("(⋅-⋅ )".to_string());
-        frames.push("(⋅o⋅ )".to_string());
-        frames.push("(⋅-⋅ )".to_string());
-        frames.push("(⋅o⋅ )".to_string());
-        frames.push("(⋅-⋅ )".to_string());
+        frames.push("(⋅-⋅ )");
+        frames.push("(⋅o⋅ )");
+        frames.push("(⋅-⋅ )");
+        frames.push("(⋅o⋅ )");
+        frames.push("(⋅-⋅ )");
 
         let mut speech = Vec::new();
         speech.push("".to_string());
@@ -177,19 +176,19 @@ impl BoopieAnimation {
 
     pub fn idle() -> Self {
         let mut frames = Vec::new();
-        frames.push("(._. )".to_string());
-        frames.push("(⋅_⋅ )".to_string());
-        frames.push("(⋅-⋅ )".to_string());
-        frames.push("( ⋅-⋅)".to_string());
-        frames.push("( ⋅-⋅)".to_string());
-        frames.push("( ⋅-⋅)".to_string());
-        frames.push("( ⋅-⋅)".to_string());
-        frames.push("( ⋅-⋅)".to_string());
-        frames.push("( ⋅-⋅)".to_string());
-        frames.push("( ⋅-⋅)".to_string());
-        frames.push("( ⋅-⋅)".to_string());
-        frames.push("(⋅-⋅ )".to_string());
-        frames.push("(._. )".to_string());
+        frames.push("(._. )");
+        frames.push("(⋅_⋅ )");
+        frames.push("(⋅-⋅ )");
+        frames.push("( ⋅-⋅)");
+        frames.push("( ⋅-⋅)");
+        frames.push("( ⋅-⋅)");
+        frames.push("( ⋅-⋅)");
+        frames.push("( ⋅-⋅)");
+        frames.push("( ⋅-⋅)");
+        frames.push("( ⋅-⋅)");
+        frames.push("( ⋅-⋅)");
+        frames.push("(⋅-⋅ )");
+        frames.push("(._. )");
 
         Self {
             frames,
@@ -198,7 +197,7 @@ impl BoopieAnimation {
     }
     pub fn sleep() -> Self {
         let mut frames = Vec::new();
-        frames.push("(─ρ─ )".to_string());
+        frames.push("(─ρ─ )");
 
         let mut speech = Vec::new();
         speech.push("Z".to_string());
@@ -212,21 +211,21 @@ impl BoopieAnimation {
     }
     pub fn sleep_alt() -> Self {
         let mut frames = Vec::new();
-        frames.push("(°ρ° )".to_string());
-        frames.push("(°ρ° )".to_string());
-        frames.push("(°ρ° )".to_string());
-        frames.push("(°ρ° )".to_string());
-        frames.push("(°ρ° )".to_string());
-        frames.push("( °ρ°)".to_string());
-        frames.push("( °ρ°)".to_string());
-        frames.push("( °ρ°)".to_string());
-        frames.push("( °ρ°)".to_string());
-        frames.push("( °ρ°)".to_string());
-        frames.push("( °ρ°)".to_string());
-        frames.push("(°ρ° )".to_string());
-        frames.push("(°ρ° )".to_string());
-        frames.push("(°ρ° )".to_string());
-        frames.push("(-ρ- )".to_string());
+        frames.push("(°ρ° )");
+        frames.push("(°ρ° )");
+        frames.push("(°ρ° )");
+        frames.push("(°ρ° )");
+        frames.push("(°ρ° )");
+        frames.push("( °ρ°)");
+        frames.push("( °ρ°)");
+        frames.push("( °ρ°)");
+        frames.push("( °ρ°)");
+        frames.push("( °ρ°)");
+        frames.push("( °ρ°)");
+        frames.push("(°ρ° )");
+        frames.push("(°ρ° )");
+        frames.push("(°ρ° )");
+        frames.push("(-ρ- )");
 
         Self {
             frames,
