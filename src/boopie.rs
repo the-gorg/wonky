@@ -46,11 +46,9 @@ impl Boopie {
         let mut speech: Vec<String> = Vec::new();
 
         while !speech_text.is_empty() {
-            let last_frame = match speech.last() {
-                Some(s) => s.to_owned(),
-                None => "".to_string(),
-            };
-            speech.push(last_frame + &speech_text.drain(0..1).collect::<String>());
+            let mut frame = String::new();
+            speech.last().map(|s| frame.push_str(s));
+            speech.push(frame + &speech_text.drain(0..2).collect::<String>());
         }
 
         let animation = BoopieAnimation {
