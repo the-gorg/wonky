@@ -1,4 +1,9 @@
-struct Boopie {
+use tinybit::widgets::Text;
+use tinybit::Color;
+use tinybit::ScreenPos;
+use tinybit::Viewport;
+
+pub struct Boopie {
     sprite_buffers: Vec<String>,
     animation: Option<BoopieAnimation>,
     x: u16,
@@ -8,7 +13,7 @@ struct Boopie {
 }
 
 impl Boopie {
-    fn new(x: u16, y: u16) -> Self {
+    pub fn new(x: u16, y: u16) -> Self {
         let mut sprite = Vec::new();
         sprite.push("(._. )".to_string());
         Self {
@@ -20,13 +25,16 @@ impl Boopie {
             animation: None,
         }
     }
+    pub fn animation(&self) -> &Option<BoopieAnimation> {
+        &self.animation
+    }
 
-    fn play_animation(&mut self, animation: BoopieAnimation) {
+    pub fn play_animation(&mut self, animation: BoopieAnimation) {
         self.frame = 0;
         self.animation = Some(animation)
     }
 
-    fn update(&mut self, viewport: &mut Viewport) {
+    pub fn update(&mut self, viewport: &mut Viewport) {
         match &self.animation {
             Some(animation) => {
                 self.fps = animation.fps;
@@ -113,14 +121,14 @@ impl Boopie {
     }
 }
 
-struct BoopieAnimation {
+pub struct BoopieAnimation {
     frames: Vec<String>,
     speech: Option<Vec<String>>,
     fps: u64,
 }
 
 impl BoopieAnimation {
-    fn hello() -> Self {
+    pub fn hello() -> Self {
         let mut frames = Vec::new();
         frames.push("(⋅-⋅ )".to_string());
         frames.push("(⋅o⋅ )".to_string());
@@ -146,7 +154,8 @@ impl BoopieAnimation {
             fps: 5,
         }
     }
-    fn idle() -> Self {
+
+    pub fn idle() -> Self {
         let mut frames = Vec::new();
         frames.push("(._. )".to_string());
         frames.push("(⋅_⋅ )".to_string());
@@ -168,7 +177,7 @@ impl BoopieAnimation {
             fps: 5,
         }
     }
-    fn sleep() -> Self {
+    pub fn sleep() -> Self {
         let mut frames = Vec::new();
         frames.push("(─ρ─ )".to_string());
 
@@ -183,7 +192,7 @@ impl BoopieAnimation {
             fps: 5,
         }
     }
-    fn sleep_alt() -> Self {
+    pub fn sleep_alt() -> Self {
         let mut frames = Vec::new();
         frames.push("(°ρ° )".to_string());
         frames.push("(°ρ° )".to_string());

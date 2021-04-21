@@ -1,3 +1,7 @@
+use crate::boopie::Boopie;
+use crate::boopie::BoopieAnimation;
+use crate::meter::Meter;
+
 use chrono::{Datelike, Local, Timelike};
 use rand::Rng;
 use tinybit::events::{events, Event, EventModel, KeyCode, KeyEvent};
@@ -5,8 +9,10 @@ use tinybit::render::{Renderer, StdoutTarget};
 use tinybit::widgets::Text;
 use tinybit::{term_size, Color, ScreenPos, ScreenSize, Viewport};
 
+mod boopie;
+mod meter;
+
 fn main() {
-    println!("Hello, world!");
     let (width, height) = term_size().unwrap();
 
     let target = StdoutTarget::new().unwrap();
@@ -21,7 +27,7 @@ fn main() {
     let mut hd2 = psutil::disk::disk_usage("/mnt/dump").expect("blerp");
 
     let mut blorper = Boopie::new(width - 6, 0);
-    blorper.animation = Some(BoopieAnimation::hello());
+    blorper.play_animation(BoopieAnimation::hello());
     let sleepy_time = 0..7;
 
     let week_text = Text::new(
@@ -107,7 +113,7 @@ fn main() {
                 );
 
                 // Character
-                match blorper.animation {
+                match blorper.animation() {
                     Some(_) => {}
                     None => {
                         if sleepy_time.contains(&time.hour()) {
@@ -145,79 +151,4 @@ fn fg_color() -> Option<Color> {
 
 fn bg_color() -> Option<Color> {
     Some(Color::DarkGreen)
-}
-
-struct Meter {
-    start: char,
-    end: char,
-    meter: char,
-    meterbg: Option<char>,
-    width: u8,
-
-    text: String,
-}
-
-impl Meter {
-    fn draw_meter(&self, viewport: &mut Viewport, (current, max): (f32, f32), position: ScreenPos) {
-        let progress = current / max * (self.width as f32 - 2_f32 - self.text.len() as f32);
-        let bar = std::iter::repeat(self.meter)
-            .take(progress as usize)
-            .collect::<String>();
-
-        let clear = std::iter::repeat(' ')
-            .take((self.width as usize).saturating_sub(2 + self.text.len()))
-            .collect::<String>();
-
-        // draw background
-        viewport.draw_widget(
-            &Text::new(
-                format!("{}{}{}{}", self.text, self.start, clear, self.end),
-                fg_color(),
-                None,
-            ),
-            position,
-        );
-        match self.meterbg {
-            Some(c) => {
-                let bgbar = std::iter::repeat(c)
-                    .take((self.width as usize).saturating_sub(2 + self.text.len()))
-                    .collect::<String>();
-                viewport.draw_widget(
-                    &Text::new(format!("{}", bgbar), bg_color(), None),
-                    ScreenPos::new(position.x + self.text.len() as u16 + 1, position.y),
-                );
-            }
-            _ => {}
-        }
-
-        // draw meter
-        viewport.draw_widget(
-            &Text::new(format!("{}", bar), fg_color(), None),
-            ScreenPos::new(position.x + self.text.len() as u16 + 1, position.y),
-        );
-    }
-}
-
-// Meter presets
-impl Meter {
-    fn default(width: u8, title: &str) -> Self {
-        Self {
-            start: '[',
-            end: ']',
-            meter: '▪',
-            width,
-            text: title.to_string(),
-            meterbg: Some('□'),
-        }
-    }
-    fn halfblock(width: u8, title: &str) -> Self {
-        Self {
-            start: '▀',
-            end: ' ',
-            meter: '▀',
-            width,
-            text: title.to_string(),
-            meterbg: Some('▀'),
-        }
-    }
 }
