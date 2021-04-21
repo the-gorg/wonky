@@ -1,9 +1,6 @@
-use crate::boopie::Boopie;
-use crate::boopie::BoopieAnimation;
-use crate::meter::Meter;
-
 use chrono::{Datelike, Local, Timelike};
 use rand::Rng;
+
 use tinybit::events::{events, Event, EventModel, KeyCode, KeyEvent};
 use tinybit::render::{Renderer, StdoutTarget};
 use tinybit::widgets::Text;
@@ -11,6 +8,8 @@ use tinybit::{term_size, Color, ScreenPos, ScreenSize, Viewport};
 
 mod boopie;
 mod meter;
+pub use boopie::{Boopie, BoopieAnimation};
+pub use meter::Meter;
 
 fn main() {
     let (width, height) = term_size().unwrap();
@@ -51,6 +50,7 @@ fn main() {
     let other_meter = Meter::halfblock((width / 2 - 2) as u8, "");
 
     let mut frame_counter = 0;
+    let mut timer = std::time::Instant::now();
 
     for event in events(EventModel::Fps(3)) {
         match event {
@@ -125,7 +125,8 @@ fn main() {
                             }
                         } else {
                             let mut rng = rand::thread_rng();
-                            if rng.gen_range(0..100) > 95 {
+                            if timer.elapsed().as_secs() > 10 && rng.gen_range(0..100) > 95 {
+                                timer = std::time::Instant::now();
                                 blorper.play_animation(BoopieAnimation::idle());
                             }
                         }
@@ -145,10 +146,12 @@ fn main() {
     }
 }
 
+#[allow(dead_code)]
 fn fg_color() -> Option<Color> {
     Some(Color::Green)
 }
 
+#[allow(dead_code)]
 fn bg_color() -> Option<Color> {
     Some(Color::DarkGreen)
 }
