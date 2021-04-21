@@ -19,7 +19,6 @@ fn main() {
     let mut viewport = Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
 
     let time = Local::now();
-
     let days_month = days_in_month::days_in_month(time.year(), time.month());
 
     let mut hd1 = psutil::disk::disk_usage("/").expect("blerp");
@@ -59,6 +58,7 @@ fn main() {
                 if frame_counter == 5 {
                     hd1 = psutil::disk::disk_usage("/").expect("blerp");
                     hd2 = psutil::disk::disk_usage("/mnt/dump").expect("blerp");
+
                     frame_counter = 0
                 }
 
@@ -141,6 +141,10 @@ fn main() {
                 code: KeyCode::Enter,
                 ..
             }) => return,
+            Event::Key(KeyEvent {
+                code: KeyCode::Char('f'),
+                ..
+            }) => blorper.speak("It works!!"),
             _ => {}
         }
     }
