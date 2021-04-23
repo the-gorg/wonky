@@ -3,7 +3,7 @@ use tinybit::Color;
 use tinybit::ScreenPos;
 use tinybit::Viewport;
 
-pub struct Meter {
+pub struct MeterTheme {
     start: char,
     end: char,
     meter: char,
@@ -13,7 +13,7 @@ pub struct Meter {
     text: String,
 }
 
-impl Meter {
+impl MeterTheme {
     pub fn draw_meter(
         &self,
         viewport: &mut Viewport,
@@ -60,7 +60,7 @@ impl Meter {
 }
 
 // Meter presets
-impl Meter {
+impl MeterTheme {
     pub fn default(width: u8, title: &str) -> Self {
         Self {
             start: '[',
