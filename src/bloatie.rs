@@ -3,15 +3,30 @@ use tinybit::Color;
 use tinybit::ScreenPos;
 use tinybit::Viewport;
 
-pub struct Boopie {
+#[allow(unused_macros)]
+macro_rules! logit {
+    ($($arg:tt)*) => {
+        use std::fs::OpenOptions;
+        use std::io::Write;
+        if let Ok(mut file) = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .append(true)
+            .open("/tmp/logit.txt") {
+                file.write_all(format!($($arg)*).as_bytes());
+        }
+    };
+}
+
+pub struct Bloatie {
     sprite_buffers: Vec<String>,
-    animation: Option<BoopieAnimation>,
+    animation: Option<BloatieAnimation>,
     x: u16,
     y: u16,
     frame: usize,
 }
 
-impl Boopie {
+impl Bloatie {
     pub fn new(x: u16, y: u16) -> Self {
         let mut sprite = Vec::new();
         sprite.push("(._. )".to_string());
@@ -24,32 +39,39 @@ impl Boopie {
         }
     }
 
-    pub fn animation(&self) -> &Option<BoopieAnimation> {
+    pub fn animation(&self) -> &Option<BloatieAnimation> {
         &self.animation
     }
 
-    pub fn play_animation(&mut self, animation: BoopieAnimation) {
+    pub fn play_animation(&mut self, animation: BloatieAnimation) {
         self.frame = 0;
         self.animation = Some(animation)
     }
 
     pub fn speak(&mut self, text: &str) {
+        let mut speech_text = text.to_owned();
         let frames: Vec<&str> = vec!["(⋅-⋅ )", "(⋅o⋅ )"]
             .into_iter()
             .cycle()
-            .take(text.len())
+            .take(speech_text.len())
             .collect();
 
-        let mut speech_text = text.to_string();
         let mut speech: Vec<String> = Vec::new();
 
         while !speech_text.is_empty() {
             let mut frame = String::new();
             speech.last().map(|s| frame.push_str(s));
-            speech.push(frame + &speech_text.drain(0..2).collect::<String>());
+
+            // TODO: look at this
+            if speech_text.len() == 1 {
+                speech.push(frame + &speech_text.pop().unwrap().to_string());
+            } else {
+                speech
+                    .push(frame + &speech_text.drain(0..2).collect::<String>());
+            }
         }
 
-        let animation = BoopieAnimation {
+        let animation = BloatieAnimation {
             frames,
             speech: Some(speech),
         };
@@ -62,9 +84,15 @@ impl Boopie {
             Some(animation) => {
                 let animation_complete = match self.frame {
                     n if n < animation.frames.len() => {
-                        let frame =
-                            Text::new(format!("{}", animation.frames[n]), Some(Color::White), None);
-                        viewport.draw_widget(&frame, ScreenPos::new(self.x, self.y));
+                        let frame = Text::new(
+                            format!("{}", animation.frames[n]),
+                            Some(Color::White),
+                            None,
+                        );
+                        viewport.draw_widget(
+                            &frame,
+                            ScreenPos::new(self.x, self.y),
+                        );
                         false
                     }
                     _ => {
@@ -73,7 +101,10 @@ impl Boopie {
                             Some(Color::White),
                             None,
                         );
-                        viewport.draw_widget(&frame, ScreenPos::new(self.x, self.y));
+                        viewport.draw_widget(
+                            &frame,
+                            ScreenPos::new(self.x, self.y),
+                        );
                         true
                     }
                 };
@@ -85,7 +116,10 @@ impl Boopie {
                             false
                         }
                         _ => {
-                            self.speech(&speech_frames.last().unwrap(), viewport);
+                            self.speech(
+                                &speech_frames.last().unwrap(),
+                                viewport,
+                            );
                             true
                         }
                     },
@@ -142,12 +176,12 @@ impl Boopie {
     }
 }
 
-pub struct BoopieAnimation {
+pub struct BloatieAnimation {
     frames: Vec<&'static str>,
     speech: Option<Vec<String>>,
 }
 
-impl BoopieAnimation {
+impl BloatieAnimation {
     pub fn hello() -> Self {
         let mut frames = Vec::new();
         frames.push("(⋅-⋅ )");
