@@ -1,4 +1,5 @@
 use chrono::{Datelike, Local, Timelike};
+use config::{Config, File};
 use rand::Rng;
 
 use tinybit::events::{events, Event, EventModel, KeyCode, KeyEvent};
@@ -6,47 +7,49 @@ use tinybit::render::{Renderer, StdoutTarget};
 use tinybit::widgets::Text;
 use tinybit::{term_size, Color, ScreenPos, ScreenSize, Viewport};
 
-mod boopie;
-mod meter;
-pub use boopie::{Boopie, BoopieAnimation};
-pub use meter::Meter;
+use crate::settings::Meter;
+
+mod bloatie;
+mod meter_theme;
+mod settings;
+
+pub use bloatie::{Bloatie, BloatieAnimation};
+pub use meter_theme::MeterTheme;
+pub use settings::Conf;
 
 fn main() {
     let (width, height) = term_size().unwrap();
 
+    let mut test = Meter::new();
+    test.init();
+
+    let mut settings = Config::default();
+
+    settings.merge(File::with_name("config.toml")).unwrap();
+    let mut conf = settings.try_into::<Conf>().unwrap();
+
+    for blerp in conf.meters.iter_mut() {
+        blerp.init();
+    }
+
     let target = StdoutTarget::new().unwrap();
     let mut renderer = Renderer::new(target);
-    let mut viewport = Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
+    let mut viewport =
+        Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
 
-    let time = Local::now();
+    let mut time = Local::now();
     let days_month = days_in_month::days_in_month(time.year(), time.month());
 
     let mut hd1 = psutil::disk::disk_usage("/").expect("blerp");
     let mut hd2 = psutil::disk::disk_usage("/mnt/dump").expect("blerp");
 
-    let mut blorper = Boopie::new(width - 6, 0);
-    blorper.play_animation(BoopieAnimation::hello());
+    let mut bloatie = Bloatie::new(width - 6, 0);
+    bloatie.speak("Hello!!");
+
     let sleepy_time = 0..7;
 
-    let week_text = Text::new(
-        format!("Week: {}", &time.iso_week().week()),
-        fg_color(),
-        None,
-    );
-
-    let month_text = Text::new(
-        format!(
-            "Date: {} {}/{}",
-            &time.weekday(),
-            &time.day(),
-            &time.month()
-        ),
-        fg_color(),
-        None,
-    );
-
-    let meter_test = Meter::default(width as u8, "Progress:");
-    let other_meter = Meter::halfblock((width / 2 - 2) as u8, "");
+    let meter_test = MeterTheme::default(width as u8, "Progress:");
+    let other_meter = MeterTheme::halfblock((width / 2 - 2) as u8, "");
 
     let mut frame_counter = 0;
     let mut timer = std::time::Instant::now();
@@ -54,6 +57,32 @@ fn main() {
     for event in events(EventModel::Fps(3)) {
         match event {
             Event::Tick => {
+                let mut top = 0_u16;
+                for blerp in conf.meters.iter_mut() {
+                    blerp.update();
+                    viewport.draw_widget(
+                        &Text::new(
+                            format!(
+                                "{}:{:05}/{:05}{}",
+                                blerp.title,
+                                blerp.current_value,
+                                blerp.max_value,
+                                blerp.unit
+                            ),
+                            fg_color(),
+                            None,
+                        ),
+                        ScreenPos::new(0, top * 2),
+                    );
+                    other_meter.draw_meter(
+                        &mut viewport,
+                        (blerp.current_value as f32, blerp.max_value as f32),
+                        ScreenPos::new(0, top * 2 + 1),
+                    );
+
+                    top += 1
+                }
+
                 // TODO: Prob make up something better
                 if frame_counter == 5 {
                     hd1 = psutil::disk::disk_usage("/").expect("blerp");
@@ -61,50 +90,52 @@ fn main() {
 
                     frame_counter = 0
                 }
+                time = Local::now();
 
-                // Hd1
+                // Weekmeter
                 viewport.draw_widget(
                     &Text::new(
                         format!(
-                            "Hd1:   {:03}/{:03}gb",
-                            hd1.free() / 1000000000,
-                            hd1.total() / 1000000000
+                            "{}           {}/{}",
+                            time.weekday(),
+                            time.weekday().number_from_monday(),
+                            7
                         ),
                         fg_color(),
                         None,
                     ),
-                    ScreenPos::new(0, 0),
+                    ScreenPos::new(0, height - 5),
                 );
 
                 other_meter.draw_meter(
                     &mut viewport,
-                    (hd1.free() as f32, hd1.total() as f32),
-                    ScreenPos::new(0, 1),
+                    (time.weekday().number_from_monday() as f32, 7 as f32),
+                    ScreenPos::new(0, height - 4),
                 );
 
-                // Hd2
+                // Weekmeter
                 viewport.draw_widget(
                     &Text::new(
                         format!(
-                            "Hd2:   {:03}/{:03}gb",
-                            hd2.free() / 1000000000,
-                            hd2.total() / 1000000000
+                            "Week        {:01}/{}",
+                            time.iso_week().week(),
+                            52
                         ),
                         fg_color(),
                         None,
                     ),
-                    ScreenPos::new(0, 2),
+                    ScreenPos::new(0, height - 3),
                 );
 
                 other_meter.draw_meter(
                     &mut viewport,
-                    (hd2.free() as f32, hd2.total() as f32),
-                    ScreenPos::new(0, 3),
+                    (time.iso_week().week() as f32, 52 as f32),
+                    ScreenPos::new(0, height - 2),
                 );
 
                 // Date and stuff
-                viewport.draw_widget(&month_text, ScreenPos::new(0, height - 3));
-                viewport.draw_widget(&week_text, ScreenPos::new(0, height - 2));
+                //viewport.draw_widget(&month_text, ScreenPos::new(0, height - 3));
+                //viewport.draw_widget(&week_text, ScreenPos::new(0, height - 2));
 
                 meter_test.draw_meter(
                     &mut viewport,
@@ -113,27 +144,33 @@ fn main() {
                 );
 
                 // Character
-                match blorper.animation() {
+                match bloatie.animation() {
                     Some(_) => {}
                     None => {
                         if sleepy_time.contains(&time.hour()) {
                             let mut rng = rand::thread_rng();
-                            if rng.gen_range(0..200) == 199 {
-                                blorper.play_animation(BoopieAnimation::sleep_alt());
+                            if rng.gen_range(0..350) == 199 {
+                                bloatie.play_animation(
+                                    BloatieAnimation::sleep_alt(),
+                                );
                             } else {
-                                blorper.play_animation(BoopieAnimation::sleep());
+                                bloatie
+                                    .play_animation(BloatieAnimation::sleep());
                             }
                         } else {
                             let mut rng = rand::thread_rng();
-                            if timer.elapsed().as_secs() > 10 && rng.gen_range(0..100) > 95 {
+                            if timer.elapsed().as_secs() > 10
+                                && rng.gen_range(0..100) > 95
+                            {
                                 timer = std::time::Instant::now();
-                                blorper.play_animation(BoopieAnimation::idle());
+                                bloatie
+                                    .play_animation(BloatieAnimation::idle());
                             }
                         }
                     }
                 }
 
-                blorper.update(&mut viewport);
+                bloatie.update(&mut viewport);
                 renderer.render(&mut viewport);
                 frame_counter += 1;
             }
@@ -144,7 +181,7 @@ fn main() {
             Event::Key(KeyEvent {
                 code: KeyCode::Char('f'),
                 ..
-            }) => blorper.speak("It works!!"),
+            }) => bloatie.speak("It works!!"),
             _ => {}
         }
     }
