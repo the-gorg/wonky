@@ -88,7 +88,6 @@ impl Meter {
             Self::construct_command(self.max_command.to_string()).unwrap();
 
         self.max_value = cmd.get_stdout().parse().unwrap();
-        self.max_value = cmd.get_stdout().parse().unwrap();
     }
 
     fn construct_command(command: String) -> Option<Command> {
