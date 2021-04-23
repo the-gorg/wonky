@@ -1,0 +1,33 @@
+
+[[indicators]]
+title       = "test"
+command     = "a command"
+frequency   = 2
+left        = false
+
+[[indicators]]
+title       = "test"
+command     = "a command"
+frequency   = 2
+left        = false
+
+[[meters]]
+title           = "HD1"
+max_command     = "bash /home/gorg/bin/sh/bloaty/disk_size /"
+value_command   = "bash /home/gorg/bin/sh/bloaty/disk_free /" 
+frequency       = 60
+left            = false
+bottom          = false
+unit            = "mb"
+
+[[meters]]
+title           = "HD2"
+max_command     = "bash /home/gorg/bin/sh/bloaty/disk_size /mnt/dump/"
+value_command   = "bash /home/gorg/bin/sh/bloaty/disk_free /mnt/dump/" 
+frequency       = 60
+left            = false
+bottom          = false
+unit            = "mb"
+
+
+
