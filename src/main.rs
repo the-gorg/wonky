@@ -69,9 +69,10 @@ fn main() -> Result<()> {
 
                     let increment = if bottom { -1 } else { 1 };
 
+                    // TODO: Offsets are not great, but it works
                     let vertical_pos =
-                        if bottom { height as i16 - 2 } else { 0 };
-                    let horizontal_pos = if right { width / 2 + 3 } else { 0 };
+                        if bottom { height as i16 - 1 } else { 1 };
+                    let horizontal_pos = if right { width / 2 + 2 } else { 0 };
 
                     let mut i = 0;
 
