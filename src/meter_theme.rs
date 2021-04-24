@@ -5,6 +5,8 @@ use tinybit::Color;
 use tinybit::ScreenPos;
 use tinybit::Viewport;
 
+use crate::settings::Meter;
+
 pub struct MeterTheme<'a> {
     start: Option<char>,
     end: Option<char>,
@@ -19,27 +21,34 @@ impl<'a> MeterTheme<'a> {
     pub fn draw(
         &self,
         viewport: &mut Viewport,
+        meter: &mut Meter,
         (current, max): (f32, f32),
         position: ScreenPos,
     ) {
         let decoration_size =
             self.start.is_some() as u8 + self.end.is_some() as u8;
 
+        let prefix = match &mut meter.prefix {
+            Some(p) => p.to_string(),
+            _ => "".to_string(),
+        };
+
         let start = match self.start {
             Some(c) => c.to_string(),
             _ => "".to_string(),
         };
+
         let end = match self.end {
             Some(c) => c.to_string(),
             _ => "".to_string(),
         };
 
-        let bar_width = self.width - self.text.len() as u8 - decoration_size;
+        let bar_width = self.width - prefix.len() as u8 - decoration_size;
 
         let progress = current / max
             * (self.width as f32
                 - decoration_size as f32
-                - self.text.len() as f32);
+                - prefix.len() as f32);
 
         let bar = iter::repeat(self.meter)
             .take(progress as usize)
@@ -52,7 +61,7 @@ impl<'a> MeterTheme<'a> {
         // draw background
         viewport.draw_widget(
             &Text::new(
-                format!("{}{}{}{}", self.text, start, clear, end),
+                format!("{}{}{}{}", prefix, start, clear, end),
                 fg_color(),
                 None,
             ),
@@ -67,7 +76,7 @@ impl<'a> MeterTheme<'a> {
                 ScreenPos::new(
                     position.x
                         + self.start.is_some() as u16
-                        + self.text.len() as u16,
+                        + prefix.len() as u16,
                     position.y,
                 ),
             );
@@ -77,9 +86,7 @@ impl<'a> MeterTheme<'a> {
         viewport.draw_widget(
             &Text::new(bar, fg_color(), None),
             ScreenPos::new(
-                position.x
-                    + self.start.is_some() as u16
-                    + self.text.len() as u16,
+                position.x + self.start.is_some() as u16 + prefix.len() as u16,
                 position.y,
             ),
         );
