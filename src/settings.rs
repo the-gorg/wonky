@@ -29,11 +29,44 @@ pub struct Conf {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct Indicator {
+pub struct Indicator {
     title: String,
     command: String,
     frequency: u64,
-    left: bool,
+
+    pub right: bool,
+    pub bottom: bool,
+
+    #[serde(skip_serializing, skip_deserializing)]
+    value: bool,
+    #[serde(skip_serializing, skip_deserializing)]
+    reading: String,
+    #[serde(skip_serializing, skip_deserializing)]
+    timer: Option<Instant>,
+}
+
+impl Indicator {
+    pub fn update(&mut self) {
+        if self.timer.is_none()
+            || self.timer.unwrap().elapsed().as_secs() > self.frequency
+        {
+            self.timer = Some(Instant::now());
+            let mut cmd = construct_command(self.command.to_string()).unwrap();
+
+            self.value = cmd.get_stdout().parse().unwrap()
+        }
+    }
+
+    pub fn init(&mut self) {
+        let output = construct_command(self.command.to_string())
+            .unwrap()
+            .get_stdout();
+
+        let mut split = output.split(' ').map(|s| s.to_string()).into_iter();
+
+        self.value = split.next().unwrap().parse().unwrap();
+        self.reading = split.collect::<String>();
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
