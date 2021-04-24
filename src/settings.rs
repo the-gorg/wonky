@@ -87,6 +87,7 @@ pub struct Meter {
     pub right: bool,
     pub bottom: bool,
 
+    pub theme: usize,
     #[serde(skip_deserializing)]
     pub max_value: u64,
     #[serde(skip_deserializing)]
@@ -130,6 +131,7 @@ impl Default for Meter {
             timer: None,
             value_cmd: construct_command("memcheck"),
             max_cmd: construct_command("echo 16000"),
+            theme: 1,
         }
     }
 }

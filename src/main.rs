@@ -45,6 +45,10 @@ fn main() -> Result<()> {
 
     let sleepy_time = 0..7;
 
+    let meter_themes = vec![
+        MeterTheme::halfblock((width / 2 - 2) as u8, ""),
+        MeterTheme::default((width / 2 - 2) as u8, ""),
+    ];
     #[allow(unused_variables)]
     let mut blocky_theme =
         MeterTheme::default((width / 2 - 2) as u8, "Progress:");
