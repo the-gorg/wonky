@@ -22,6 +22,8 @@ impl<'a> MeterTheme<'a> {
         (current, max): (f32, f32),
         position: ScreenPos,
     ) {
+        let decoration_size =
+            self.start.is_some() as u8 + self.end.is_some() as u8;
 
         let start = match self.start {
             Some(c) => c.to_string(),
@@ -31,12 +33,20 @@ impl<'a> MeterTheme<'a> {
             Some(c) => c.to_string(),
             _ => "".to_string(),
         };
+
+        let bar_width = self.width - self.text.len() as u8 - decoration_size;
+
+        let progress = current / max
+            * (self.width as f32
+                - decoration_size as f32
+                - self.text.len() as f32);
+
         let bar = iter::repeat(self.meter)
             .take(progress as usize)
             .collect::<String>();
 
         let clear = iter::repeat(' ')
-            .take((self.width as usize).saturating_sub(2 + self.text.len()))
+            .take(bar_width as usize)
             .collect::<String>();
 
         // draw background
@@ -48,20 +58,30 @@ impl<'a> MeterTheme<'a> {
             ),
             position,
         );
+
         if let Some(c) = self.meterbg {
-            let bgbar = iter::repeat(c)
-                .take((self.width as usize).saturating_sub(2 + self.text.len()))
-                .collect::<String>();
+            let bgbar =
+                iter::repeat(c).take(bar_width as usize).collect::<String>();
             viewport.draw_widget(
                 &Text::new(bgbar, bg_color(), None),
-                ScreenPos::new(position.x + self.text.len() as u16 + 1, position.y),
+                ScreenPos::new(
+                    position.x
+                        + self.start.is_some() as u16
+                        + self.text.len() as u16,
+                    position.y,
+                ),
             );
         }
 
         // draw meter
         viewport.draw_widget(
             &Text::new(bar, fg_color(), None),
-            ScreenPos::new(position.x + self.text.len() as u16 + 1, position.y),
+            ScreenPos::new(
+                position.x
+                    + self.start.is_some() as u16
+                    + self.text.len() as u16,
+                position.y,
+            ),
         );
     }
 
