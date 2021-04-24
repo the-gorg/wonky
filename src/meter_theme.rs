@@ -6,8 +6,8 @@ use tinybit::ScreenPos;
 use tinybit::Viewport;
 
 pub struct MeterTheme<'a> {
-    start: char,
-    end: char,
+    start: Option<char>,
+    end: Option<char>,
     meter: char,
     meterbg: Option<char>,
     width: u8,
@@ -22,7 +22,15 @@ impl<'a> MeterTheme<'a> {
         (current, max): (f32, f32),
         position: ScreenPos,
     ) {
-        let progress = current / max * (self.width as f32 - 2_f32 - self.text.len() as f32);
+
+        let start = match self.start {
+            Some(c) => c.to_string(),
+            _ => "".to_string(),
+        };
+        let end = match self.end {
+            Some(c) => c.to_string(),
+            _ => "".to_string(),
+        };
         let bar = iter::repeat(self.meter)
             .take(progress as usize)
             .collect::<String>();
@@ -34,7 +42,7 @@ impl<'a> MeterTheme<'a> {
         // draw background
         viewport.draw_widget(
             &Text::new(
-                format!("{}{}{}{}", self.text, self.start, clear, self.end),
+                format!("{}{}{}{}", self.text, start, clear, end),
                 fg_color(),
                 None,
             ),
@@ -63,8 +71,8 @@ impl<'a> MeterTheme<'a> {
 
     pub fn default(width: u8, title: &'a str) -> Self {
         Self {
-            start: '[',
-            end: ']',
+            start: Some('['),
+            end: Some(']'),
             meter: '▪',
             width,
             text: title,
@@ -73,8 +81,8 @@ impl<'a> MeterTheme<'a> {
     }
     pub fn halfblock(width: u8, title: &'a str) -> Self {
         Self {
-            start: '▀',
-            end: ' ',
+            start: None,
+            end: None,
             meter: '▀',
             width,
             text: title,
