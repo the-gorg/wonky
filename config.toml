@@ -1,33 +1,51 @@
-
-[[indicators]]
+[[widgets]]
+type        = "Indicator"
 title       = "test"
-command     = "a command"
+command     = "echo false"
 frequency   = 2
-left        = false
+right       = false
+bottom      = false
 
-[[indicators]]
-title       = "test"
-command     = "a command"
-frequency   = 2
-left        = false
-
-[[meters]]
+[[widgets]]
+type            = "Meter"
 title           = "HD1"
 max_command     = "bash /home/gorg/bin/sh/bloaty/disk_size /"
 value_command   = "bash /home/gorg/bin/sh/bloaty/disk_free /" 
 frequency       = 60
-left            = false
+right           = false
 bottom          = false
 unit            = "mb"
 
-[[meters]]
+[[widgets]]
+type            = "Meter"
 title           = "HD2"
 max_command     = "bash /home/gorg/bin/sh/bloaty/disk_size /mnt/dump/"
 value_command   = "bash /home/gorg/bin/sh/bloaty/disk_free /mnt/dump/" 
 frequency       = 60
-left            = false
+right           = false
 bottom          = false
 unit            = "mb"
 
+
+
+[[widgets]]
+type            = "Meter"
+title           = "Week"
+max_command     = "echo 52"
+value_command   = "bash /home/gorg/bin/sh/bloaty/weeknr" 
+frequency       = 60
+right           = false
+bottom          = true
+unit            = ""
+
+[[widgets]]
+type            = "Meter"
+title           = "Day"
+max_command     = "echo 7"
+value_command   = "bash /home/gorg/bin/sh/bloaty/weekday_nr" 
+frequency       = 60
+right           = false
+bottom          = true
+unit            = ""
 
 
