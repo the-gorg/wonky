@@ -116,18 +116,35 @@ impl Meter {
         {
             self.timer = Some(Instant::now());
             let mut cmd =
-                Self::construct_command(self.value_command.to_string())
-                    .unwrap();
+                construct_command(self.value_command.to_string()).unwrap();
+
             self.current_value = cmd.get_stdout().parse().unwrap()
         }
     }
 
     pub fn init(&mut self) {
-        let mut cmd =
-            Self::construct_command(self.max_command.to_string()).unwrap();
+        let mut cmd = construct_command(self.max_command.to_string()).unwrap();
 
         self.max_value = cmd.get_stdout().parse().unwrap();
     }
+
+    pub fn new() -> Self {
+        Self {
+            title: "RAM".to_string(),
+            unit: "mb".to_string(),
+            max_value: 0,
+            current_value: 0,
+            max_command: "echo 16014".to_string(),
+            value_command: "memcheck".to_string(),
+            frequency: 1,
+            right: true,
+            bottom: false,
+            timer: None,
+            value_cmd: construct_command("memcheck".to_string()),
+            max_cmd: construct_command("echo 16000".to_string()),
+        }
+    }
+}
 
     fn construct_command(command: String) -> Option<Command> {
         let mut split = command
