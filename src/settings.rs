@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::{process::Command, string, time::Instant};
+use std::{process::Command, time::Instant};
 
 #[allow(unused_macros)]
 macro_rules! logit {
@@ -17,9 +17,15 @@ macro_rules! logit {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(tag = "type")]
+pub enum Widget {
+    Meter(Meter),
+    Indicator(Indicator),
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Conf {
-    pub meters: Vec<Meter>,
-    indicators: Vec<Indicator>,
+    pub widgets: Vec<Widget>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
