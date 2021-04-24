@@ -1,3 +1,5 @@
+use std::iter;
+
 use tinybit::widgets::Text;
 use tinybit::Color;
 use tinybit::ScreenPos;
@@ -28,10 +30,8 @@ pub struct Bloatie {
 
 impl Bloatie {
     pub fn new(x: u16, y: u16) -> Self {
-        let mut sprite = Vec::new();
-        sprite.push("(._. )".to_string());
         Self {
-            sprite_buffers: sprite,
+            sprite_buffers: vec!["(._. )".to_string()],
             x,
             y,
             frame: 0,
@@ -60,14 +60,15 @@ impl Bloatie {
 
         while !speech_text.is_empty() {
             let mut frame = String::new();
-            speech.last().map(|s| frame.push_str(s));
+            if let Some(s) = speech.last() {
+                frame.push_str(s)
+            }
 
             // TODO: look at this
             if speech_text.len() == 1 {
                 speech.push(frame + &speech_text.pop().unwrap().to_string());
             } else {
-                speech
-                    .push(frame + &speech_text.drain(0..2).collect::<String>());
+                speech.push(frame + &speech_text.drain(0..2).collect::<String>());
             }
         }
 
@@ -84,27 +85,14 @@ impl Bloatie {
             Some(animation) => {
                 let animation_complete = match self.frame {
                     n if n < animation.frames.len() => {
-                        let frame = Text::new(
-                            format!("{}", animation.frames[n]),
-                            Some(Color::White),
-                            None,
-                        );
-                        viewport.draw_widget(
-                            &frame,
-                            ScreenPos::new(self.x, self.y),
-                        );
+                        let frame = Text::new(animation.frames[n], Some(Color::White), None);
+                        viewport.draw_widget(&frame, ScreenPos::new(self.x, self.y));
                         false
                     }
                     _ => {
-                        let frame = Text::new(
-                            format!("{}", animation.frames.last().unwrap()),
-                            Some(Color::White),
-                            None,
-                        );
-                        viewport.draw_widget(
-                            &frame,
-                            ScreenPos::new(self.x, self.y),
-                        );
+                        let frame =
+                            Text::new(*animation.frames.last().unwrap(), Some(Color::White), None);
+                        viewport.draw_widget(&frame, ScreenPos::new(self.x, self.y));
                         true
                     }
                 };
@@ -116,10 +104,7 @@ impl Bloatie {
                             false
                         }
                         _ => {
-                            self.speech(
-                                &speech_frames.last().unwrap(),
-                                viewport,
-                            );
+                            self.speech(&speech_frames.last().unwrap(), viewport);
                             true
                         }
                     },
@@ -132,37 +117,33 @@ impl Bloatie {
                 self.frame += 1;
             }
             _ => {
-                let frame = Text::new(
-                    format!("{}", "(._. )".to_string()),
-                    Some(Color::White),
-                    None,
-                );
+                let frame = Text::new("(._. )".to_string(), Some(Color::White), None);
                 viewport.draw_widget(&frame, ScreenPos::new(self.x, self.y));
             }
         }
     }
 
-    fn speech(&self, dialogue: &String, viewport: &mut Viewport) {
+    fn speech(&self, dialogue: &str, viewport: &mut Viewport) {
         let text = Text::new(
             format!(" {} ", dialogue),
             Some(Color::Black),
             Some(Color::White),
         );
 
-        let space = std::iter::repeat(' ')
+        let space = iter::repeat(' ')
             .take(dialogue.len() + 2)
             .collect::<String>();
 
         viewport.draw_widget(
             &Text::new(format!("{}", space), Some(Color::White), None),
             ScreenPos::new(
-                self.x - 2 as u16 - dialogue.len() as u16 / 2,
+                self.x - 2_u16 - dialogue.len() as u16 / 2,
                 self.y + self.sprite_buffers.len() as u16 + 1,
             ),
         );
 
         viewport.draw_widget(
-            &Text::new(format!(""), Some(Color::White), None),
+            &Text::new("".to_string(), Some(Color::White), None),
             ScreenPos::new(self.x, self.y + self.sprite_buffers.len() as u16),
         );
 
@@ -183,86 +164,44 @@ pub struct BloatieAnimation {
 
 impl BloatieAnimation {
     pub fn hello() -> Self {
-        let mut frames = Vec::new();
-        frames.push("(⋅-⋅ )");
-        frames.push("(⋅o⋅ )");
-        frames.push("(⋅-⋅ )");
-        frames.push("(⋅o⋅ )");
-        frames.push("(⋅-⋅ )");
-
-        let mut speech = Vec::new();
-        speech.push("".to_string());
-        speech.push("He".to_string());
-        speech.push("Hello!".to_string());
-        speech.push("Hello!".to_string());
-        speech.push("Hello!".to_string());
-        speech.push("Hello!".to_string());
-        speech.push("Hello!".to_string());
-        speech.push("Hello!".to_string());
-        speech.push("Hello!".to_string());
-        speech.push("Hello!".to_string());
-
         Self {
-            frames,
-            speech: Some(speech),
+            frames: vec!["(⋅-⋅ )", "(⋅o⋅ )", "(⋅-⋅ )", "(⋅o⋅ )", "(⋅-⋅ )"],
+            speech: Some(
+                iter::once("")
+                    .chain(iter::once("He"))
+                    .chain(iter::repeat("Hello!").take(8))
+                    .map(str::to_owned)
+                    .collect(),
+            ),
         }
     }
 
     pub fn idle() -> Self {
-        let mut frames = Vec::new();
-        frames.push("(._. )");
-        frames.push("(⋅_⋅ )");
-        frames.push("(⋅-⋅ )");
-        frames.push("( ⋅-⋅)");
-        frames.push("( ⋅-⋅)");
-        frames.push("( ⋅-⋅)");
-        frames.push("( ⋅-⋅)");
-        frames.push("( ⋅-⋅)");
-        frames.push("( ⋅-⋅)");
-        frames.push("( ⋅-⋅)");
-        frames.push("( ⋅-⋅)");
-        frames.push("(⋅-⋅ )");
-        frames.push("(._. )");
-
         Self {
-            frames,
+            frames: iter::repeat("(._. )")
+                .take(2)
+                .chain(iter::once("(⋅-⋅ )"))
+                .chain(iter::repeat("( ⋅-⋅)").take(8))
+                .chain(iter::once("(⋅-⋅ )"))
+                .chain(iter::once("(._. )"))
+                .collect(),
             speech: None,
         }
     }
     pub fn sleep() -> Self {
-        let mut frames = Vec::new();
-        frames.push("(─ρ─ )");
-
-        let mut speech = Vec::new();
-        speech.push("Z".to_string());
-        speech.push("Zz".to_string());
-        speech.push("Zzz".to_string());
-
         Self {
-            frames,
-            speech: Some(speech),
+            frames: vec!["(─ρ─ )"],
+            speech: Some(vec!["Z".to_string(), "Zz".to_string(), "Zzz".to_string()]),
         }
     }
     pub fn sleep_alt() -> Self {
-        let mut frames = Vec::new();
-        frames.push("(°ρ° )");
-        frames.push("(°ρ° )");
-        frames.push("(°ρ° )");
-        frames.push("(°ρ° )");
-        frames.push("(°ρ° )");
-        frames.push("( °ρ°)");
-        frames.push("( °ρ°)");
-        frames.push("( °ρ°)");
-        frames.push("( °ρ°)");
-        frames.push("( °ρ°)");
-        frames.push("( °ρ°)");
-        frames.push("(°ρ° )");
-        frames.push("(°ρ° )");
-        frames.push("(°ρ° )");
-        frames.push("(-ρ- )");
-
         Self {
-            frames,
+            frames: iter::repeat("(°ρ° )")
+                .take(5)
+                .chain(iter::repeat("( °ρ°)").take(6))
+                .chain(iter::repeat("(°ρ° )").take(3))
+                .chain(iter::once("(-ρ- )"))
+                .collect(),
             speech: None,
         }
     }
