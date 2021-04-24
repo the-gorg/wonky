@@ -78,8 +78,8 @@ pub struct Meter {
     value_command: String,
     frequency: u64,
 
-    left: bool,
-    bottom: bool,
+    pub right: bool,
+    pub bottom: bool,
 
     #[serde(skip_serializing, skip_deserializing)]
     pub max_value: u64,
