@@ -93,8 +93,8 @@ fn main() -> Result<()> {
                                 if !m.meter || !m.reading || m.title == "" {
                                     i += increment;
                                 } else {
-                                i += increment * 2;
-                            }
+                                    i += increment * 2;
+                                }
                             }
                             Widget::Indicator(_) => {
                                 //
@@ -107,34 +107,34 @@ fn main() -> Result<()> {
 
                 // Character
                 if conf.settings.bloatie {
-                match bloatie.animation() {
-                    Some(_) => {}
-                    None => {
-                        if sleepy_time.contains(&Local::now().hour()) {
-                            let mut rng = rand::thread_rng();
-                            if rng.gen_range(0..350) == 199 {
-                                bloatie.play_animation(
-                                    BloatieAnimation::sleep_alt(),
-                                );
-                            } else {
+                    match bloatie.animation() {
+                        Some(_) => {}
+                        None => {
+                            if sleepy_time.contains(&Local::now().hour()) {
+                                let mut rng = rand::thread_rng();
+                                if rng.gen_range(0..350) == 199 {
+                                    bloatie.play_animation(
+                                        BloatieAnimation::sleep_alt(),
+                                    );
+                                } else {
                                     bloatie.play_animation(
                                         BloatieAnimation::sleep(),
                                     );
-                            }
-                        } else {
-                            let mut rng = rand::thread_rng();
-                            if timer.elapsed().as_secs() > 10
-                                && rng.gen_range(0..100) > 95
-                            {
-                                timer = std::time::Instant::now();
+                                }
+                            } else {
+                                let mut rng = rand::thread_rng();
+                                if timer.elapsed().as_secs() > 10
+                                    && rng.gen_range(0..100) > 95
+                                {
+                                    timer = std::time::Instant::now();
                                     bloatie.play_animation(
                                         BloatieAnimation::idle(),
                                     );
+                                }
                             }
                         }
                     }
-                }
-                bloatie.update(&mut viewport);
+                    bloatie.update(&mut viewport);
                 }
                 renderer.render(&mut viewport);
             }
