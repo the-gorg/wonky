@@ -9,7 +9,7 @@ use tinybit::{ScreenPos, Viewport};
 use crate::MeterTheme;
 
 pub fn load() -> Result<Conf> {
-    let config_file = ProjectDirs::from("github", "the-gorg", "thingy")
+    let config_file = ProjectDirs::from("github", "the-gorg", "wonky")
         .context("project directory not found")?
         .config_dir()
         .join("config.toml");
