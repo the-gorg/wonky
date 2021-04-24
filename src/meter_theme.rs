@@ -16,7 +16,7 @@ pub struct MeterTheme<'a> {
 }
 
 impl<'a> MeterTheme<'a> {
-    pub fn draw_meter(
+    pub fn draw(
         &self,
         viewport: &mut Viewport,
         (current, max): (f32, f32),

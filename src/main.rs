@@ -84,10 +84,27 @@ fn main() -> Result<()> {
                                     ),
                                 );
 
-                                normal_theme.draw_meter(
+                                normal_theme.draw(
                                     &mut viewport,
-                                    (m.current_value as f32, m.max_value as f32),
-                                    ScreenPos::new(horizontal_pos, (vertical_pos + 1 + i) as u16),
+                                    (
+                                        m.current_value as f32,
+                                        m.max_value as f32,
+                                    ),
+                                    ScreenPos::new(
+                                        horizontal_pos,
+                                        (vertical_pos + 1 + i) as u16,
+                                    ),
+                                );
+                                blocky_theme.draw(
+                                    &mut viewport,
+                                    (
+                                        m.current_value as f32,
+                                        m.max_value as f32,
+                                    ),
+                                    ScreenPos::new(
+                                        horizontal_pos,
+                                        (vertical_pos + 6 + (i)) as u16,
+                                    ),
                                 );
                                 i += increment * 2;
                             }
