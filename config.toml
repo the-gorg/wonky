@@ -40,12 +40,31 @@ unit            = ""
 
 [[widgets]]
 type            = "Meter"
-title           = "Day"
-max_command     = "echo 7"
-value_command   = "bash /home/gorg/bin/sh/bloaty/weekday_nr" 
+title           = "Week"
+max_command     = "echo 52"
+value_command   = "bash /home/gorg/bin/sh/bloaty/weeknr" 
 frequency       = 60
 right           = false
 bottom          = true
 unit            = ""
 
+[[widgets]]
+type            = "Meter"
+title           = "Day"
+max_command     = "echo 7"
+value_command   = "bash /home/gorg/bin/sh/bloaty/weekday_nr" 
+frequency       = 60
+right           = true
+bottom          = true
+unit            = ""
+
+[[widgets]]
+type            = "Meter"
+title           = "Day"
+max_command     = "echo 7"
+value_command   = "bash /home/gorg/bin/sh/bloaty/weekday_nr" 
+frequency       = 60
+right           = true
+bottom          = true
+unit            = ""
 

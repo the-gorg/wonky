@@ -19,17 +19,17 @@ pub use settings::{Conf, Widget};
 
 fn main() {
     let (width, height) = term_size().unwrap();
-
-    let mut test = Meter::new();
-    test.init();
+    let target = StdoutTarget::new().unwrap();
+    let mut renderer = Renderer::new(target);
+    let mut viewport =
+        Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
 
     let mut settings = Config::default();
-
     settings.merge(File::with_name("config.toml")).unwrap();
+
     let mut conf = settings.try_into::<Conf>().unwrap();
 
     let mut positions: [Vec<&mut Widget>; 4] = [vec![], vec![], vec![], vec![]];
-
     for w in conf.widgets.iter_mut() {
         match w {
             Widget::Meter(m) => {
@@ -42,11 +42,6 @@ fn main() {
             }
         }
     }
-
-    let target = StdoutTarget::new().unwrap();
-    let mut renderer = Renderer::new(target);
-    let mut viewport =
-        Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
 
     let mut bloatie = Bloatie::new(width - 6, 0);
     bloatie.speak("Hello!!");
@@ -70,6 +65,8 @@ fn main() {
 
                     let vertical_pos: i16 =
                         if bottom { height as i16 - 2 } else { 0 };
+                    let horizontal_pos: u16 =
+                        if right { width / 2 + 3 } else { 0 };
 
                     let mut i = 0;
 
@@ -84,7 +81,7 @@ fn main() {
                                         None,
                                     ),
                                     ScreenPos::new(
-                                        0,
+                                        horizontal_pos,
                                         (vertical_pos + (i)) as u16,
                                     ),
                                 );
@@ -100,7 +97,10 @@ fn main() {
                                     &test,
                                     ScreenPos::new(
                                         // TODO: why 3?!?
-                                        width / 2 - 3 - test.0.len() as u16,
+                                        horizontal_pos
+                                            + (width / 2
+                                                - 3
+                                                - test.0.len() as u16),
                                         (vertical_pos + (i)) as u16,
                                     ),
                                 );
@@ -112,7 +112,7 @@ fn main() {
                                         m.max_value as f32,
                                     ),
                                     ScreenPos::new(
-                                        0,
+                                        horizontal_pos,
                                         (vertical_pos + 1 + (i)) as u16,
                                     ),
                                 );
