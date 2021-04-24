@@ -5,23 +5,8 @@ use tinybit::Color;
 use tinybit::ScreenPos;
 use tinybit::Viewport;
 
-#[allow(unused_macros)]
-macro_rules! logit {
-    ($($arg:tt)*) => {
-        use std::fs::OpenOptions;
-        use std::io::Write;
-        if let Ok(mut file) = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .append(true)
-            .open("/tmp/logit.txt") {
-                file.write_all(format!($($arg)*).as_bytes());
-        }
-    };
-}
-
 pub struct Bloatie {
-    sprite_buffers: Vec<String>,
+    sprite_buffers: &'static [&'static str],
     animation: Option<BloatieAnimation>,
     x: u16,
     y: u16,
@@ -31,7 +16,7 @@ pub struct Bloatie {
 impl Bloatie {
     pub fn new(x: u16, y: u16) -> Self {
         Self {
-            sprite_buffers: vec!["(._. )".to_string()],
+            sprite_buffers: &["(._. )"],
             x,
             y,
             frame: 0,
@@ -49,28 +34,19 @@ impl Bloatie {
     }
 
     pub fn speak(&mut self, text: &str) {
-        let mut speech_text = text.to_owned();
+        let text = text.to_owned();
         let frames: Vec<&str> = vec!["(⋅-⋅ )", "(⋅o⋅ )"]
             .into_iter()
             .cycle()
-            .take(speech_text.len())
+            .take(text.len())
             .collect();
 
-        let mut speech: Vec<String> = Vec::new();
-
-        while !speech_text.is_empty() {
-            let mut frame = String::new();
-            if let Some(s) = speech.last() {
-                frame.push_str(s)
-            }
-
-            // TODO: look at this
-            if speech_text.len() == 1 {
-                speech.push(frame + &speech_text.pop().unwrap().to_string());
-            } else {
-                speech.push(frame + &speech_text.drain(0..2).collect::<String>());
-            }
-        }
+        let speech = text
+            .char_indices()
+            .step_by(2)
+            .map(|(i, _)| text[..i].to_owned())
+            .chain(std::iter::once(text.clone()))
+            .collect();
 
         let animation = BloatieAnimation {
             frames,
@@ -90,8 +66,11 @@ impl Bloatie {
                         false
                     }
                     _ => {
-                        let frame =
-                            Text::new(*animation.frames.last().unwrap(), Some(Color::White), None);
+                        let frame = Text::new(
+                            animation.frames.last().cloned().unwrap_or_default(),
+                            Some(Color::White),
+                            None,
+                        );
                         viewport.draw_widget(&frame, ScreenPos::new(self.x, self.y));
                         true
                     }
@@ -104,7 +83,10 @@ impl Bloatie {
                             false
                         }
                         _ => {
-                            self.speech(&speech_frames.last().unwrap(), viewport);
+                            self.speech(
+                                speech_frames.last().map(String::as_str).unwrap_or_default(),
+                                viewport,
+                            );
                             true
                         }
                     },

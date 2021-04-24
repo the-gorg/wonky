@@ -1,19 +1,21 @@
+use std::iter;
+
 use tinybit::widgets::Text;
 use tinybit::Color;
 use tinybit::ScreenPos;
 use tinybit::Viewport;
 
-pub struct MeterTheme {
+pub struct MeterTheme<'a> {
     start: char,
     end: char,
     meter: char,
     meterbg: Option<char>,
     width: u8,
 
-    text: String,
+    text: &'a str,
 }
 
-impl MeterTheme {
+impl<'a> MeterTheme<'a> {
     pub fn draw_meter(
         &self,
         viewport: &mut Viewport,
@@ -21,11 +23,11 @@ impl MeterTheme {
         position: ScreenPos,
     ) {
         let progress = current / max * (self.width as f32 - 2_f32 - self.text.len() as f32);
-        let bar = std::iter::repeat(self.meter)
+        let bar = iter::repeat(self.meter)
             .take(progress as usize)
             .collect::<String>();
 
-        let clear = std::iter::repeat(' ')
+        let clear = iter::repeat(' ')
             .take((self.width as usize).saturating_sub(2 + self.text.len()))
             .collect::<String>();
 
@@ -39,7 +41,7 @@ impl MeterTheme {
             position,
         );
         if let Some(c) = self.meterbg {
-            let bgbar = std::iter::repeat(c)
+            let bgbar = iter::repeat(c)
                 .take((self.width as usize).saturating_sub(2 + self.text.len()))
                 .collect::<String>();
             viewport.draw_widget(
@@ -58,27 +60,24 @@ impl MeterTheme {
     pub fn resize(&mut self, width: u8) {
         self.width = width;
     }
-}
 
-// Meter presets
-impl MeterTheme {
-    pub fn default(width: u8, title: &str) -> Self {
+    pub fn default(width: u8, title: &'a str) -> Self {
         Self {
             start: '[',
             end: ']',
             meter: '▪',
             width,
-            text: title.to_string(),
+            text: title,
             meterbg: Some('□'),
         }
     }
-    pub fn halfblock(width: u8, title: &str) -> Self {
+    pub fn halfblock(width: u8, title: &'a str) -> Self {
         Self {
             start: '▀',
             end: ' ',
             meter: '▀',
             width,
-            text: title.to_string(),
+            text: title,
             meterbg: Some('▀'),
         }
     }
