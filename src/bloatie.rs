@@ -155,6 +155,11 @@ impl Bloatie {
             ),
         );
     }
+
+    pub fn relocate(&mut self, x: u16, y: u16) {
+        self.x = x;
+        self.y = y;
+    }
 }
 
 pub struct BloatieAnimation {

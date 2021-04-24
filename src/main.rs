@@ -16,7 +16,7 @@ pub use meter_theme::MeterTheme;
 pub use settings::{Conf, Widget};
 
 fn main() -> Result<()> {
-    let (width, height) = term_size().unwrap();
+    let (mut width, mut height) = term_size().unwrap();
     let target = StdoutTarget::new().unwrap();
     let mut renderer = Renderer::new(target);
     let mut viewport = Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
@@ -43,8 +43,8 @@ fn main() -> Result<()> {
     let sleepy_time = 0..7;
 
     #[allow(unused_variables)]
-    let blocky_theme = MeterTheme::default(width as u8, "Progress:");
-    let normal_theme = MeterTheme::halfblock((width / 2 - 2) as u8, "");
+    let mut blocky_theme = MeterTheme::default(width as u8, "Progress:");
+    let mut normal_theme = MeterTheme::halfblock((width / 2 - 2) as u8, "");
 
     let mut timer = std::time::Instant::now();
 
@@ -130,6 +130,16 @@ fn main() -> Result<()> {
                 code: KeyCode::Char('f'),
                 ..
             }) => bloatie.speak("It works!!"),
+            Event::Resize(w, h) => {
+                width = w;
+                height = h;
+                viewport.resize(width, height);
+                renderer.clear();
+
+                bloatie.relocate(width - 6, 0);
+                blocky_theme.resize(width as u8);
+                normal_theme.resize((width / 2 - 2) as u8);
+            }
             _ => {}
         }
     }
