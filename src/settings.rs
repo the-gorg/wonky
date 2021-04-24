@@ -3,14 +3,19 @@ use std::{process::Command, time::Instant};
 use anyhow::{anyhow, Context, Result};
 use directories_next::ProjectDirs;
 use serde::Deserialize;
+use tinybit::{widgets::Text, Color};
+use tinybit::{ScreenPos, Viewport};
+
+use crate::MeterTheme;
 
 pub fn load() -> Result<Conf> {
     let config_file = ProjectDirs::from("github", "the-gorg", "thingy")
         .context("project directory not found")?
         .config_dir()
         .join("config.toml");
-    let buf = std::fs::read(&config_file)
-        .with_context(|| anyhow!("no config file found at: {}", config_file.display()))?;
+    let buf = std::fs::read(&config_file).with_context(|| {
+        anyhow!("no config file found at: {}", config_file.display())
+    })?;
 
     toml::from_slice(&buf).map_err(Into::into)
 }
@@ -68,7 +73,9 @@ impl Indicator {
     }
 
     pub fn init(&mut self) -> Result<()> {
-        if let Some(output) = construct_command(&self.command).map(|mut cmd| cmd.get_stdout()) {
+        if let Some(output) =
+            construct_command(&self.command).map(|mut cmd| cmd.get_stdout())
+        {
             let mut split = output.split(' ');
 
             if let Some(value) = split.next() {
@@ -93,8 +100,13 @@ pub struct Meter {
     pub right: bool,
     pub bottom: bool,
 
+    pub meter: bool,
+    pub reading: bool,
+
     pub theme: usize,
+
     pub prefix: Option<String>,
+
     #[serde(skip_deserializing)]
     pub max_value: u64,
     #[serde(skip_deserializing)]
@@ -133,13 +145,15 @@ impl Default for Meter {
             max_command: "echo 16014".to_string(),
             value_command: "memcheck".to_string(),
             frequency: 1,
-            right: true,
-            bottom: false,
             timer: None,
             value_cmd: construct_command("memcheck"),
             max_cmd: construct_command("echo 16000"),
             prefix: None,
             theme: 1,
+            right: true,
+            bottom: false,
+            meter: true,
+            reading: true,
         }
     }
 }
