@@ -2,7 +2,7 @@ use anyhow::Result;
 use chrono::{Local, Timelike};
 use rand::Rng;
 
-use tinybit::events::{events, Event, EventModel, KeyCode, KeyEvent};
+use tinybit::events::{events, Event, EventModel, KeyCode, KeyEvent, KeyModifiers};
 use tinybit::render::{Renderer, StdoutTarget};
 use tinybit::widgets::Text;
 use tinybit::{term_size, Color, ScreenPos, ScreenSize, Viewport};
@@ -122,14 +122,12 @@ fn main() -> Result<()> {
                 bloatie.update(&mut viewport);
                 renderer.render(&mut viewport);
             }
-            Event::Key(KeyEvent {
-                code: KeyCode::Enter,
-                ..
-            }) => return Ok(()),
-            Event::Key(KeyEvent {
-                code: KeyCode::Char('f'),
-                ..
-            }) => bloatie.speak("It works!!"),
+            Event::Key(KeyEvent { code, modifiers }) => match code {
+                KeyCode::Enter | KeyCode::Char('q') => return Ok(()),
+                KeyCode::Char('c') if modifiers == KeyModifiers::CONTROL => return Ok(()),
+                KeyCode::Char('f') => bloatie.speak("It works!!"),
+                _ => {}
+            },
             Event::Resize(w, h) => {
                 width = w;
                 height = h;
@@ -140,7 +138,6 @@ fn main() -> Result<()> {
                 blocky_theme.resize(width as u8);
                 normal_theme.resize((width / 2 - 2) as u8);
             }
-            _ => {}
         }
     }
 
