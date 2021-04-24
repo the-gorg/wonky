@@ -105,6 +105,7 @@ fn main() -> Result<()> {
                 })?;
 
                 // Character
+                if conf.settings.bloatie {
                 match bloatie.animation() {
                     Some(_) => {}
                     None => {
@@ -115,8 +116,9 @@ fn main() -> Result<()> {
                                     BloatieAnimation::sleep_alt(),
                                 );
                             } else {
-                                bloatie
-                                    .play_animation(BloatieAnimation::sleep());
+                                    bloatie.play_animation(
+                                        BloatieAnimation::sleep(),
+                                    );
                             }
                         } else {
                             let mut rng = rand::thread_rng();
@@ -124,14 +126,15 @@ fn main() -> Result<()> {
                                 && rng.gen_range(0..100) > 95
                             {
                                 timer = std::time::Instant::now();
-                                bloatie
-                                    .play_animation(BloatieAnimation::idle());
+                                    bloatie.play_animation(
+                                        BloatieAnimation::idle(),
+                                    );
                             }
                         }
                     }
                 }
-
                 bloatie.update(&mut viewport);
+                }
                 renderer.render(&mut viewport);
             }
             Event::Key(KeyEvent { code, modifiers }) => match code {
@@ -157,11 +160,6 @@ fn main() -> Result<()> {
 
     Ok(())
 }
-
-fn pos_index(right: bool, bottom: bool) -> usize {
-    right as usize | (bottom as usize) << 1
-}
-
 #[allow(dead_code, clippy::unnecessary_wraps)]
 fn fg_color() -> Option<Color> {
     Some(Color::Green)
@@ -170,4 +168,8 @@ fn fg_color() -> Option<Color> {
 #[allow(dead_code, clippy::unnecessary_wraps)]
 fn bg_color() -> Option<Color> {
     Some(Color::DarkGreen)
+}
+
+fn pos_index(right: bool, bottom: bool) -> usize {
+    right as usize | (bottom as usize) << 1
 }

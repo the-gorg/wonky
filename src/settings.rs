@@ -16,6 +16,11 @@ pub fn load() -> Result<Conf> {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct Settings {
+    pub bloatie: bool,
+}
+
+#[derive(Debug, Deserialize)]
 #[serde(tag = "type")]
 pub enum Widget {
     Meter(Meter),
@@ -25,6 +30,7 @@ pub enum Widget {
 #[derive(Debug, Deserialize)]
 pub struct Conf {
     pub widgets: Vec<Widget>,
+    pub settings: Settings,
 }
 
 #[derive(Debug, Deserialize)]
