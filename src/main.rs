@@ -1,4 +1,4 @@
-use chrono::{Datelike, Local, Timelike};
+use chrono::{Local, Timelike};
 use config::{Config, File};
 use rand::Rng;
 
@@ -15,7 +15,7 @@ mod settings;
 
 pub use bloatie::{Bloatie, BloatieAnimation};
 pub use meter_theme::MeterTheme;
-pub use settings::Conf;
+pub use settings::{Conf, Widget};
 
 fn main() {
     let (width, height) = term_size().unwrap();
@@ -28,8 +28,19 @@ fn main() {
     settings.merge(File::with_name("config.toml")).unwrap();
     let mut conf = settings.try_into::<Conf>().unwrap();
 
-    for blerp in conf.meters.iter_mut() {
-        blerp.init();
+    let mut positions: [Vec<&mut Widget>; 4] = [vec![], vec![], vec![], vec![]];
+
+    for w in conf.widgets.iter_mut() {
+        match w {
+            Widget::Meter(m) => {
+                m.init();
+                positions[pos_index(m.right, m.bottom)].push(w);
+            }
+            Widget::Indicator(i) => {
+                i.init();
+                positions[pos_index(i.right, i.bottom)].push(w);
+            }
+        }
     }
 
     let target = StdoutTarget::new().unwrap();
@@ -37,117 +48,88 @@ fn main() {
     let mut viewport =
         Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
 
-    let mut time = Local::now();
-    let days_month = days_in_month::days_in_month(time.year(), time.month());
-
-    let mut hd1 = psutil::disk::disk_usage("/").expect("blerp");
-    let mut hd2 = psutil::disk::disk_usage("/mnt/dump").expect("blerp");
-
     let mut bloatie = Bloatie::new(width - 6, 0);
     bloatie.speak("Hello!!");
 
     let sleepy_time = 0..7;
 
-    let meter_test = MeterTheme::default(width as u8, "Progress:");
-    let other_meter = MeterTheme::halfblock((width / 2 - 2) as u8, "");
+    #[allow(unused_variables)]
+    let blocky_theme = MeterTheme::default(width as u8, "Progress:");
+    let normal_theme = MeterTheme::halfblock((width / 2 - 2) as u8, "");
 
-    let mut frame_counter = 0;
     let mut timer = std::time::Instant::now();
 
     for event in events(EventModel::Fps(3)) {
         match event {
             Event::Tick => {
-                let mut top = 0_u16;
-                for blerp in conf.meters.iter_mut() {
-                    blerp.update();
-                    viewport.draw_widget(
-                        &Text::new(
-                            format!(
-                                "{}:{:05}/{:05}{}",
-                                blerp.title,
-                                blerp.current_value,
-                                blerp.max_value,
-                                blerp.unit
-                            ),
-                            fg_color(),
-                            None,
-                        ),
-                        ScreenPos::new(0, top * 2),
-                    );
-                    other_meter.draw_meter(
-                        &mut viewport,
-                        (blerp.current_value as f32, blerp.max_value as f32),
-                        ScreenPos::new(0, top * 2 + 1),
-                    );
+                for n in 0..4 {
+                    let right: bool = n == 1 || n == 3;
+                    let bottom: bool = n == 2 || n == 3;
 
-                    top += 1
+                    let increment: i16 = if bottom { -1 } else { 1 };
+
+                    let vertical_pos: i16 =
+                        if bottom { height as i16 - 2 } else { 0 };
+
+                    let mut i = 0;
+
+                    for thing in positions[n].iter_mut() {
+                        match thing {
+                            Widget::Meter(m) => {
+                                m.update();
+                                viewport.draw_widget(
+                                    &Text::new(
+                                        format!("{}", m.title,),
+                                        fg_color(),
+                                        None,
+                                    ),
+                                    ScreenPos::new(
+                                        0,
+                                        (vertical_pos + (i)) as u16,
+                                    ),
+                                );
+                                let test = Text::new(
+                                    format!(
+                                        "{}/{}{}",
+                                        m.current_value, m.max_value, m.unit
+                                    ),
+                                    fg_color(),
+                                    None,
+                                );
+                                viewport.draw_widget(
+                                    &test,
+                                    ScreenPos::new(
+                                        // TODO: why 3?!?
+                                        width / 2 - 3 - test.0.len() as u16,
+                                        (vertical_pos + (i)) as u16,
+                                    ),
+                                );
+
+                                normal_theme.draw_meter(
+                                    &mut viewport,
+                                    (
+                                        m.current_value as f32,
+                                        m.max_value as f32,
+                                    ),
+                                    ScreenPos::new(
+                                        0,
+                                        (vertical_pos + 1 + (i)) as u16,
+                                    ),
+                                );
+                                i += increment * 2;
+                            }
+                            Widget::Indicator(_) => {
+                                //
+                            }
+                        }
+                    }
                 }
-
-                // TODO: Prob make up something better
-                if frame_counter == 5 {
-                    hd1 = psutil::disk::disk_usage("/").expect("blerp");
-                    hd2 = psutil::disk::disk_usage("/mnt/dump").expect("blerp");
-
-                    frame_counter = 0
-                }
-                time = Local::now();
-
-                // Weekmeter
-                viewport.draw_widget(
-                    &Text::new(
-                        format!(
-                            "{}           {}/{}",
-                            time.weekday(),
-                            time.weekday().number_from_monday(),
-                            7
-                        ),
-                        fg_color(),
-                        None,
-                    ),
-                    ScreenPos::new(0, height - 5),
-                );
-
-                other_meter.draw_meter(
-                    &mut viewport,
-                    (time.weekday().number_from_monday() as f32, 7 as f32),
-                    ScreenPos::new(0, height - 4),
-                );
-
-                // Weekmeter
-                viewport.draw_widget(
-                    &Text::new(
-                        format!(
-                            "Week        {:01}/{}",
-                            time.iso_week().week(),
-                            52
-                        ),
-                        fg_color(),
-                        None,
-                    ),
-                    ScreenPos::new(0, height - 3),
-                );
-
-                other_meter.draw_meter(
-                    &mut viewport,
-                    (time.iso_week().week() as f32, 52 as f32),
-                    ScreenPos::new(0, height - 2),
-                );
-
-                // Date and stuff
-                //viewport.draw_widget(&month_text, ScreenPos::new(0, height - 3));
-                //viewport.draw_widget(&week_text, ScreenPos::new(0, height - 2));
-
-                meter_test.draw_meter(
-                    &mut viewport,
-                    (time.day() as f32, days_month as f32),
-                    ScreenPos::new(0, height - 1),
-                );
 
                 // Character
                 match bloatie.animation() {
                     Some(_) => {}
                     None => {
-                        if sleepy_time.contains(&time.hour()) {
+                        if sleepy_time.contains(&Local::now().hour()) {
                             let mut rng = rand::thread_rng();
                             if rng.gen_range(0..350) == 199 {
                                 bloatie.play_animation(
@@ -172,7 +154,6 @@ fn main() {
 
                 bloatie.update(&mut viewport);
                 renderer.render(&mut viewport);
-                frame_counter += 1;
             }
             Event::Key(KeyEvent {
                 code: KeyCode::Enter,
@@ -185,6 +166,10 @@ fn main() {
             _ => {}
         }
     }
+}
+
+fn pos_index(right: bool, bottom: bool) -> usize {
+    right as usize | (bottom as usize) << 1
 }
 
 #[allow(dead_code)]
