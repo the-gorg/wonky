@@ -54,6 +54,10 @@ impl MeterTheme {
             ScreenPos::new(position.x + self.text.len() as u16 + 1, position.y),
         );
     }
+
+    pub fn resize(&mut self, width: u8) {
+        self.width = width;
+    }
 }
 
 // Meter presets
