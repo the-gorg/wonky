@@ -146,39 +146,21 @@ impl Meter {
     }
 }
 
-    fn construct_command(command: String) -> Option<Command> {
-        let mut split = command
-            .split(' ')
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>()
-            .into_iter();
+fn construct_command(command: String) -> Option<Command> {
+    let mut split = command
+        .split(' ')
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>()
+        .into_iter();
 
-        let cmd = split.next()?;
-        let args = split.collect::<Vec<String>>();
-        let mut command = Command::new(cmd);
+    let cmd = split.next()?;
+    let args = split.collect::<Vec<String>>();
+    let mut command = Command::new(cmd);
 
-        if args.len() == 0 {
-            Some(command)
-        } else {
-            command.args(args);
-            Some(command)
-        }
-    }
-
-    pub fn new() -> Self {
-        Self {
-            title: "RAM".to_string(),
-            unit: "mb".to_string(),
-            max_value: 0,
-            current_value: 0,
-            max_command: "echo 16014".to_string(),
-            value_command: "memcheck".to_string(),
-            frequency: 1,
-            left: true,
-            bottom: false,
-            timer: None,
-            value_cmd: Self::construct_command("memcheck".to_string()),
-            max_cmd: Self::construct_command("echo 16000".to_string()),
-        }
+    if args.len() == 0 {
+        Some(command)
+    } else {
+        command.args(args);
+        Some(command)
     }
 }
