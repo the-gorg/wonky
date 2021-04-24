@@ -4,21 +4,6 @@ use anyhow::{anyhow, Context, Result};
 use directories_next::ProjectDirs;
 use serde::Deserialize;
 
-#[allow(unused_macros)]
-macro_rules! logit {
-    ($($arg:tt)*) => {
-        use std::fs::OpenOptions;
-        use std::io::Write;
-        if let Ok(mut file) = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .append(true)
-            .open("/tmp/logit.txt") {
-                file.write_all(format!($($arg)*).as_bytes());
-        }
-    };
-}
-
 pub fn load() -> Result<Conf> {
     let config_file = ProjectDirs::from("github", "the-gorg", "thingy")
         .context("project directory not found")?
@@ -60,24 +45,33 @@ pub struct Indicator {
 }
 
 impl Indicator {
-    pub fn update(&mut self) {
-        if self.timer.is_none() || self.timer.unwrap().elapsed().as_secs() > self.frequency {
+    pub fn update(&mut self) -> Result<()> {
+        if self
+            .timer
+            .map(|t| t.elapsed().as_secs() > self.frequency)
+            .unwrap_or(true)
+        {
             self.timer = Some(Instant::now());
-            let mut cmd = construct_command(self.command.to_string()).unwrap();
 
-            self.value = cmd.get_stdout().parse().unwrap()
+            if let Some(mut cmd) = construct_command(&self.command) {
+                self.value = cmd.get_stdout().parse()?;
+            }
         }
+
+        Ok(())
     }
 
-    pub fn init(&mut self) {
-        let output = construct_command(self.command.to_string())
-            .unwrap()
-            .get_stdout();
+    pub fn init(&mut self) -> Result<()> {
+        if let Some(output) = construct_command(&self.command).map(|mut cmd| cmd.get_stdout()) {
+            let mut split = output.split(' ');
 
-        let mut split = output.split(' ');
+            if let Some(value) = split.next() {
+                self.value = value.parse()?;
+                self.reading = split.collect();
+            }
+        }
 
-        self.value = split.next().unwrap().parse().unwrap();
-        self.reading = split.collect::<String>();
+        Ok(())
     }
 }
 
@@ -134,26 +128,35 @@ impl Default for Meter {
             right: true,
             bottom: false,
             timer: None,
-            value_cmd: construct_command("memcheck".to_string()),
-            max_cmd: construct_command("echo 16000".to_string()),
+            value_cmd: construct_command("memcheck"),
+            max_cmd: construct_command("echo 16000"),
         }
     }
 }
 
 impl Meter {
-    pub fn update(&mut self) {
-        if self.timer.is_none() || self.timer.unwrap().elapsed().as_secs() > self.frequency {
+    pub fn update(&mut self) -> Result<()> {
+        if self
+            .timer
+            .map(|t| t.elapsed().as_secs() > self.frequency)
+            .unwrap_or(true)
+        {
             self.timer = Some(Instant::now());
-            let mut cmd = construct_command(self.value_command.to_string()).unwrap();
 
-            self.current_value = cmd.get_stdout().parse().unwrap()
+            if let Some(mut cmd) = construct_command(&self.value_command) {
+                self.current_value = cmd.get_stdout().parse()?;
+            }
         }
+
+        Ok(())
     }
 
-    pub fn init(&mut self) {
-        let mut cmd = construct_command(self.max_command.to_string()).unwrap();
+    pub fn init(&mut self) -> Result<()> {
+        if let Some(mut cmd) = construct_command(&self.max_command) {
+            self.max_value = cmd.get_stdout().parse()?;
+        }
 
-        self.max_value = cmd.get_stdout().parse().unwrap();
+        Ok(())
     }
 
     pub fn new() -> Self {
@@ -161,21 +164,12 @@ impl Meter {
     }
 }
 
-fn construct_command(command: String) -> Option<Command> {
-    let mut split = command
-        .split(' ')
-        .map(|s| s.to_string())
-        .collect::<Vec<String>>()
-        .into_iter();
-
+fn construct_command(command: &str) -> Option<Command> {
+    let mut split = command.split_whitespace();
     let cmd = split.next()?;
-    let args = split.collect::<Vec<String>>();
-    let mut command = Command::new(cmd);
 
-    if args.is_empty() {
-        Some(command)
-    } else {
-        command.args(args);
-        Some(command)
-    }
+    let mut command = Command::new(cmd);
+    command.args(split);
+
+    Some(command)
 }

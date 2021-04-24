@@ -16,8 +16,8 @@ pub use meter_theme::MeterTheme;
 pub use settings::{Conf, Widget};
 
 fn main() -> Result<()> {
-    let (mut width, mut height) = term_size().unwrap();
-    let target = StdoutTarget::new().unwrap();
+    let (mut width, mut height) = term_size()?;
+    let target = StdoutTarget::new()?;
     let mut renderer = Renderer::new(target);
     let mut viewport = Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
 
@@ -27,11 +27,11 @@ fn main() -> Result<()> {
     for w in conf.widgets.iter_mut() {
         match w {
             Widget::Meter(m) => {
-                m.init();
+                m.init()?;
                 positions[pos_index(m.right, m.bottom)].push(w);
             }
             Widget::Indicator(i) => {
-                i.init();
+                i.init()?;
                 positions[pos_index(i.right, i.bottom)].push(w);
             }
         }
@@ -51,21 +51,21 @@ fn main() -> Result<()> {
     for event in events(EventModel::Fps(3)) {
         match event {
             Event::Tick => {
-                (0..4).for_each(|n| {
-                    let right: bool = n == 1 || n == 3;
-                    let bottom: bool = n == 2 || n == 3;
+                (0..4).try_for_each(|n| {
+                    let right = n == 1 || n == 3;
+                    let bottom = n == 2 || n == 3;
 
-                    let increment: i16 = if bottom { -1 } else { 1 };
+                    let increment = if bottom { -1 } else { 1 };
 
-                    let vertical_pos: i16 = if bottom { height as i16 - 2 } else { 0 };
-                    let horizontal_pos: u16 = if right { width / 2 + 3 } else { 0 };
+                    let vertical_pos = if bottom { height as i16 - 2 } else { 0 };
+                    let horizontal_pos = if right { width / 2 + 3 } else { 0 };
 
                     let mut i = 0;
 
                     for thing in positions[n].iter_mut() {
                         match thing {
                             Widget::Meter(m) => {
-                                m.update();
+                                m.update()?;
                                 viewport.draw_widget(
                                     &Text::new(m.title.clone(), fg_color(), None),
                                     ScreenPos::new(horizontal_pos, (vertical_pos + (i)) as u16),
@@ -80,14 +80,14 @@ fn main() -> Result<()> {
                                     ScreenPos::new(
                                         // TODO: why 3?!?
                                         horizontal_pos + (width / 2 - 3 - test.0.len() as u16),
-                                        (vertical_pos + (i)) as u16,
+                                        (vertical_pos + i) as u16,
                                     ),
                                 );
 
                                 normal_theme.draw_meter(
                                     &mut viewport,
                                     (m.current_value as f32, m.max_value as f32),
-                                    ScreenPos::new(horizontal_pos, (vertical_pos + 1 + (i)) as u16),
+                                    ScreenPos::new(horizontal_pos, (vertical_pos + 1 + i) as u16),
                                 );
                                 i += increment * 2;
                             }
@@ -96,7 +96,9 @@ fn main() -> Result<()> {
                             }
                         }
                     }
-                });
+
+                    Ok::<_, anyhow::Error>(())
+                })?;
 
                 // Character
                 match bloatie.animation() {
