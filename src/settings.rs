@@ -168,6 +168,64 @@ impl Meter {
     }
 }
 
+//-------------------------------------------------------------------------------------
+// Drawing
+//-------------------------------------------------------------------------------------
+impl Meter {
+    pub fn update_and_draw(
+        &mut self,
+        viewport: &mut Viewport,
+        pos: &mut ScreenPos,
+        theme: &MeterTheme,
+        increment: i16,
+    ) -> Result<()> {
+        self.update()?;
+
+        viewport.draw_widget(
+            &Text::new(self.title.clone(), fg_color(), None),
+            ScreenPos::new(pos.x, pos.y),
+        );
+
+        if self.reading {
+            let value_reading = Text::new(
+                format!(
+                    "{}/{}{}",
+                    self.current_value, self.max_value, self.unit
+                ),
+                fg_color(),
+                None,
+            );
+
+            viewport.draw_widget(
+                &value_reading,
+                ScreenPos::new(
+                    // TODO: why 2?!?
+                    pos.x
+                        + (viewport.size.width / 2
+                            - 2
+                            - value_reading.0.len() as u16),
+                    pos.y.saturating_sub(1),
+                ),
+            );
+        }
+        if self.title != "" {
+            viewport.draw_widget(
+                &Text::new(self.title.clone(), fg_color(), None),
+                ScreenPos::new(pos.x, pos.y.saturating_sub(1)),
+            );
+        }
+
+        theme.draw(
+            viewport,
+            self,
+            (self.current_value as f32, self.max_value as f32),
+            ScreenPos::new(pos.x, pos.y),
+        );
+
+        Ok(())
+    }
+}
+
 fn construct_command(command: &str) -> Option<Command> {
     let mut split = command.split_whitespace();
     let cmd = split.next()?;
@@ -176,4 +234,13 @@ fn construct_command(command: &str) -> Option<Command> {
     command.args(split);
 
     Some(command)
+}
+#[allow(dead_code, clippy::unnecessary_wraps)]
+fn fg_color() -> Option<Color> {
+    Some(Color::Green)
+}
+
+#[allow(dead_code, clippy::unnecessary_wraps)]
+fn bg_color() -> Option<Color> {
+    Some(Color::DarkGreen)
 }

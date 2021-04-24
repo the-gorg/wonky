@@ -1,3 +1,7 @@
+//      █░█░█ █▀█ █▄░█ █▄▀ █▄█
+//      ▀▄▀▄▀ █▄█ █░▀█ █░█ ░█░
+// For your terminal monitoring needs
+//
 use anyhow::Result;
 use chrono::{Local, Timelike};
 use rand::Rng;
@@ -74,51 +78,22 @@ fn main() -> Result<()> {
                     for thing in positions[n].iter_mut() {
                         match thing {
                             Widget::Meter(m) => {
-                                m.update()?;
-                                viewport.draw_widget(
-                                    &Text::new(
-                                        m.title.clone(),
-                                        fg_color(),
-                                        None,
-                                    ),
-                                    ScreenPos::new(
+                                m.update_and_draw(
+                                    &mut viewport,
+                                    &mut ScreenPos::new(
                                         horizontal_pos,
-                                        (vertical_pos + (i)) as u16,
-                                    ),
-                                );
-                                let test = Text::new(
-                                    format!(
-                                        "{}/{}{}",
-                                        m.current_value, m.max_value, m.unit
-                                    ),
-                                    fg_color(),
-                                    None,
-                                );
-                                viewport.draw_widget(
-                                    &test,
-                                    ScreenPos::new(
-                                        // TODO: why 3?!?
-                                        horizontal_pos
-                                            + (width / 2
-                                                - 3
-                                                - test.0.len() as u16),
                                         (vertical_pos + i) as u16,
                                     ),
-                                );
+                                    &meter_themes[m.theme],
+                                    increment,
+                                )?;
 
-                                normal_theme.draw(
-                                    &mut viewport,
-                                    (
-                                        m.current_value as f32,
-                                        m.max_value as f32,
-                                    ),
-                                    ScreenPos::new(
-                                        horizontal_pos,
-                                        (vertical_pos + 1 + i) as u16,
-                                    ),
-                                );
-
+                                // If single-line or not, make prettier
+                                if !m.meter || !m.reading || m.title == "" {
+                                    i += increment;
+                                } else {
                                 i += increment * 2;
+                            }
                             }
                             Widget::Indicator(_) => {
                                 //
