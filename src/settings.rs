@@ -1,5 +1,8 @@
-use serde::{Deserialize, Serialize};
 use std::{process::Command, time::Instant};
+
+use anyhow::{anyhow, Context, Result};
+use directories_next::ProjectDirs;
+use serde::Deserialize;
 
 #[allow(unused_macros)]
 macro_rules! logit {
@@ -16,19 +19,30 @@ macro_rules! logit {
     };
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+pub fn load() -> Result<Conf> {
+    let config_file = ProjectDirs::from("github", "the-gorg", "thingy")
+        .context("project directory not found")?
+        .config_dir()
+        .join("config.toml");
+    let buf = std::fs::read(&config_file)
+        .with_context(|| anyhow!("no config file found at: {}", config_file.display()))?;
+
+    toml::from_slice(&buf).map_err(Into::into)
+}
+
+#[derive(Debug, Deserialize)]
 #[serde(tag = "type")]
 pub enum Widget {
     Meter(Meter),
     Indicator(Indicator),
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct Conf {
     pub widgets: Vec<Widget>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct Indicator {
     title: String,
     command: String,
@@ -37,19 +51,17 @@ pub struct Indicator {
     pub right: bool,
     pub bottom: bool,
 
-    #[serde(skip_serializing, skip_deserializing)]
+    #[serde(skip_deserializing)]
     value: bool,
-    #[serde(skip_serializing, skip_deserializing)]
+    #[serde(skip_deserializing)]
     reading: String,
-    #[serde(skip_serializing, skip_deserializing)]
+    #[serde(skip_deserializing)]
     timer: Option<Instant>,
 }
 
 impl Indicator {
     pub fn update(&mut self) {
-        if self.timer.is_none()
-            || self.timer.unwrap().elapsed().as_secs() > self.frequency
-        {
+        if self.timer.is_none() || self.timer.unwrap().elapsed().as_secs() > self.frequency {
             self.timer = Some(Instant::now());
             let mut cmd = construct_command(self.command.to_string()).unwrap();
 
@@ -62,14 +74,14 @@ impl Indicator {
             .unwrap()
             .get_stdout();
 
-        let mut split = output.split(' ').map(|s| s.to_string()).into_iter();
+        let mut split = output.split(' ');
 
         self.value = split.next().unwrap().parse().unwrap();
         self.reading = split.collect::<String>();
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct Meter {
     pub title: String,
     pub unit: String,
@@ -81,16 +93,16 @@ pub struct Meter {
     pub right: bool,
     pub bottom: bool,
 
-    #[serde(skip_serializing, skip_deserializing)]
+    #[serde(skip_deserializing)]
     pub max_value: u64,
-    #[serde(skip_serializing, skip_deserializing)]
+    #[serde(skip_deserializing)]
     pub current_value: u64,
 
-    #[serde(skip_serializing, skip_deserializing)]
+    #[serde(skip_deserializing)]
     max_cmd: Option<Command>,
-    #[serde(skip_serializing, skip_deserializing)]
+    #[serde(skip_deserializing)]
     value_cmd: Option<Command>,
-    #[serde(skip_serializing, skip_deserializing)]
+    #[serde(skip_deserializing)]
     timer: Option<Instant>,
 }
 
@@ -100,7 +112,7 @@ pub trait CommandExt {
 
 impl CommandExt for Command {
     fn get_stdout(&mut self) -> String {
-        let output = self.output().expect("oops").stdout.to_owned();
+        let output = self.output().expect("oops").stdout;
 
         std::str::from_utf8(&output)
             .expect("berp")
@@ -109,26 +121,8 @@ impl CommandExt for Command {
     }
 }
 
-impl Meter {
-    pub fn update(&mut self) {
-        if self.timer.is_none()
-            || self.timer.unwrap().elapsed().as_secs() > self.frequency
-        {
-            self.timer = Some(Instant::now());
-            let mut cmd =
-                construct_command(self.value_command.to_string()).unwrap();
-
-            self.current_value = cmd.get_stdout().parse().unwrap()
-        }
-    }
-
-    pub fn init(&mut self) {
-        let mut cmd = construct_command(self.max_command.to_string()).unwrap();
-
-        self.max_value = cmd.get_stdout().parse().unwrap();
-    }
-
-    pub fn new() -> Self {
+impl Default for Meter {
+    fn default() -> Self {
         Self {
             title: "RAM".to_string(),
             unit: "mb".to_string(),
@@ -146,6 +140,27 @@ impl Meter {
     }
 }
 
+impl Meter {
+    pub fn update(&mut self) {
+        if self.timer.is_none() || self.timer.unwrap().elapsed().as_secs() > self.frequency {
+            self.timer = Some(Instant::now());
+            let mut cmd = construct_command(self.value_command.to_string()).unwrap();
+
+            self.current_value = cmd.get_stdout().parse().unwrap()
+        }
+    }
+
+    pub fn init(&mut self) {
+        let mut cmd = construct_command(self.max_command.to_string()).unwrap();
+
+        self.max_value = cmd.get_stdout().parse().unwrap();
+    }
+
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
 fn construct_command(command: String) -> Option<Command> {
     let mut split = command
         .split(' ')
@@ -157,7 +172,7 @@ fn construct_command(command: String) -> Option<Command> {
     let args = split.collect::<Vec<String>>();
     let mut command = Command::new(cmd);
 
-    if args.len() == 0 {
+    if args.is_empty() {
         Some(command)
     } else {
         command.args(args);

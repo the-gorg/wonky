@@ -38,22 +38,19 @@ impl MeterTheme {
             ),
             position,
         );
-        match self.meterbg {
-            Some(c) => {
-                let bgbar = std::iter::repeat(c)
-                    .take((self.width as usize).saturating_sub(2 + self.text.len()))
-                    .collect::<String>();
-                viewport.draw_widget(
-                    &Text::new(format!("{}", bgbar), bg_color(), None),
-                    ScreenPos::new(position.x + self.text.len() as u16 + 1, position.y),
-                );
-            }
-            _ => {}
+        if let Some(c) = self.meterbg {
+            let bgbar = std::iter::repeat(c)
+                .take((self.width as usize).saturating_sub(2 + self.text.len()))
+                .collect::<String>();
+            viewport.draw_widget(
+                &Text::new(bgbar, bg_color(), None),
+                ScreenPos::new(position.x + self.text.len() as u16 + 1, position.y),
+            );
         }
 
         // draw meter
         viewport.draw_widget(
-            &Text::new(format!("{}", bar), fg_color(), None),
+            &Text::new(bar, fg_color(), None),
             ScreenPos::new(position.x + self.text.len() as u16 + 1, position.y),
         );
     }
@@ -83,12 +80,12 @@ impl MeterTheme {
     }
 }
 
-#[allow(dead_code)]
+#[allow(dead_code, clippy::unnecessary_wraps)]
 fn fg_color() -> Option<Color> {
     Some(Color::Green)
 }
 
-#[allow(dead_code)]
+#[allow(dead_code, clippy::unnecessary_wraps)]
 fn bg_color() -> Option<Color> {
     Some(Color::DarkGreen)
 }
