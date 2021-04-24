@@ -37,6 +37,9 @@ fn main() -> Result<()> {
                 m.init()?;
                 positions[pos_index(m.right, m.bottom)].push(w);
             }
+            Widget::Seperator(s) => {
+                positions[pos_index(s.right, s.bottom)].push(w);
+            }
             Widget::Indicator(i) => {
                 i.init()?;
                 positions[pos_index(i.right, i.bottom)].push(w);
@@ -86,7 +89,6 @@ fn main() -> Result<()> {
                                         (vertical_pos + i) as u16,
                                     ),
                                     &meter_themes[m.theme],
-                                    increment,
                                 )?;
 
                                 // If single-line or not, make prettier
@@ -95,6 +97,16 @@ fn main() -> Result<()> {
                                 } else {
                                     i += increment * 2;
                                 }
+                            }
+                            Widget::Seperator(s) => {
+                                s.draw(
+                                    &mut viewport,
+                                    &mut ScreenPos::new(
+                                        horizontal_pos,
+                                        (vertical_pos + i) as u16,
+                                    ),
+                                )?;
+                                i += increment;
                             }
                             Widget::Indicator(_) => {
                                 //

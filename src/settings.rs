@@ -30,6 +30,7 @@ pub struct Settings {
 pub enum Widget {
     Meter(Meter),
     Indicator(Indicator),
+    Seperator(Seperator),
 }
 
 #[derive(Debug, Deserialize)]
@@ -37,6 +38,15 @@ pub struct Conf {
     pub widgets: Vec<Widget>,
     pub settings: Settings,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct Seperator {
+    pub title: Option<String>,
+    pub right: bool,
+    pub bottom: bool,
+}
+
+impl Seperator {}
 
 #[derive(Debug, Deserialize)]
 pub struct Indicator {
@@ -197,7 +207,6 @@ impl Meter {
         viewport: &mut Viewport,
         pos: &mut ScreenPos,
         theme: &MeterTheme,
-        increment: i16,
     ) -> Result<()> {
         self.update()?;
 
@@ -241,6 +250,24 @@ impl Meter {
             (self.current_value as f32, self.max_value as f32),
             ScreenPos::new(pos.x, pos.y),
         );
+
+        Ok(())
+    }
+}
+
+impl Seperator {
+    //
+    pub fn draw(
+        &mut self,
+        viewport: &mut Viewport,
+        pos: &mut ScreenPos,
+    ) -> Result<()> {
+        if let Some(t) = &self.title {
+            viewport.draw_widget(
+                &Text::new(t, fg_color(), None),
+                ScreenPos::new(pos.x, pos.y),
+            );
+        }
 
         Ok(())
     }
