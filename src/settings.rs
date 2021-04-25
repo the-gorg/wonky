@@ -281,9 +281,19 @@ impl Indicator {
     ) -> Result<()> {
         self.update()?;
         let colors = match self.value {
-            true => (bg_color(), fg_color()),
-            false => (fg_color(), bg_color()),
+            true => (Some(Color::Black), fg_color()),
+            false => (Some(Color::Black), bg_color()),
         };
+
+        viewport.draw_widget(
+            &Text::new(
+                " ".repeat((viewport.size.width / 2 - 2) as usize),
+                None,
+                colors.1,
+            ),
+            *pos,
+        );
+
         if let Some(t) = &self.title {
             viewport.draw_widget(
                 &Text::new(t, colors.0, colors.1),
