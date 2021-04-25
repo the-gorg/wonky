@@ -42,6 +42,7 @@ pub trait Widget {
     ) -> Result<()>;
     fn is_bottom(&self) -> bool;
     fn is_right(&self) -> bool;
+    fn vertical_size(&self) -> u8;
 }
 
 #[derive(Debug, Deserialize)]
@@ -306,10 +307,18 @@ impl Widget for Meter {
 
     fn is_bottom(&self) -> bool {
         self.bottom
-        }
+    }
 
     fn is_right(&self) -> bool {
         self.right
+    }
+
+    fn vertical_size(&self) -> u8 {
+        if self.reading || self.title.is_some() {
+            2
+        } else {
+            1
+        }
     }
 }
 
@@ -345,6 +354,10 @@ impl Widget for Indicator {
     fn is_right(&self) -> bool {
         self.right
     }
+
+    fn vertical_size(&self) -> u8 {
+        1
+    }
 }
 
 impl Widget for Seperator {
@@ -369,6 +382,10 @@ impl Widget for Seperator {
 
     fn is_right(&self) -> bool {
         self.right
+    }
+
+    fn vertical_size(&self) -> u8 {
+        1
     }
 }
 
