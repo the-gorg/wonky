@@ -90,7 +90,7 @@ fn main() -> Result<()> {
                                 )?;
 
                                 // If single-line or not, make prettier?
-                                if !m.reading && m.title.is_empty() {
+                                if !m.reading && m.title.is_none() {
                                     i += increment;
                                 } else {
                                     i += increment * 2;

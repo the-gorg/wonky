@@ -100,8 +100,8 @@ impl Indicator {
 
 #[derive(Debug, Deserialize)]
 pub struct Meter {
-    pub title: String,
-    pub unit: String,
+    pub title: Option<String>,
+    pub unit: Option<String>,
     pub prefix: Option<String>,
 
     max_command: String,
@@ -147,8 +147,8 @@ impl CommandExt for Command {
 impl Default for Meter {
     fn default() -> Self {
         Self {
-            title: "RAM".to_string(),
-            unit: "mb".to_string(),
+            title: Some("RAM".to_string()),
+            unit: Some("mb".to_string()),
             max_value: 0,
             current_value: 0,
             max_command: "echo 16014".to_string(),
@@ -197,9 +197,9 @@ impl Meter {
     }
 }
 
-//-------------------------------------------------------------------------------------
-// Drawing
-//-------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------+
+// Drawing                                                                    |
+//----------------------------------------------------------------------------+
 impl Meter {
     pub fn update_and_draw(
         &mut self,
@@ -209,22 +209,19 @@ impl Meter {
     ) -> Result<()> {
         self.update()?;
 
-        viewport.draw_widget(
-            &Text::new(self.title.clone(), fg_color(), None),
-            ScreenPos::new(pos.x, pos.y),
-        );
-
         // Offset one up if bottom aligned
-        if self.reading || self.title != "" {
+        if self.reading || self.title.is_some() {
             pos.y = if self.bottom { pos.y - 1 } else { pos.y };
         }
 
         if self.reading {
+            let unit = match &self.unit {
+                Some(u) => u.clone(),
+                None => "".to_string(),
+            };
+
             let value_reading = Text::new(
-                format!(
-                    "{}/{}{}",
-                    self.current_value, self.max_value, self.unit
-                ),
+                format!("{}/{}{}", self.current_value, self.max_value, unit),
                 fg_color(),
                 None,
             );
@@ -242,18 +239,18 @@ impl Meter {
             );
         }
 
-        if self.title != "" {
-            viewport.draw_widget(
-                &Text::new(self.title.clone(), fg_color(), None),
-                ScreenPos::new(pos.x, pos.y),
-            );
-        }
-
         // if we have a title or reading offset bar by 1
-        let bar_offset = if self.title != "" || self.reading {
+        let bar_offset = if self.title.is_some() || self.reading {
             1_u16
         } else {
             0_u16
+        };
+
+        if let Some(t) = &self.title {
+            viewport.draw_widget(
+                &Text::new(t, fg_color(), None),
+                ScreenPos::new(pos.x, pos.y),
+            );
         };
 
         theme.draw(
