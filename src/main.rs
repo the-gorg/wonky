@@ -1,3 +1,4 @@
+//
 //      █░█░█ █▀█ █▄░█ █▄▀ █▄█
 //      ▀▄▀▄▀ █▄█ █░▀█ █░█ ░█░
 // For your terminal monitoring needs
@@ -10,7 +11,6 @@ use tinybit::events::{
     events, Event, EventModel, KeyCode, KeyEvent, KeyModifiers,
 };
 use tinybit::render::{Renderer, StdoutTarget};
-use tinybit::widgets::Text;
 use tinybit::{term_size, Color, ScreenPos, ScreenSize, Viewport};
 
 mod bloatie;
@@ -91,7 +91,7 @@ fn main() -> Result<()> {
                                     &meter_themes[m.theme],
                                 )?;
 
-                                // If single-line or not, make prettier
+                                // If single-line or not, make prettier?
                                 if !m.meter || !m.reading || m.title == "" {
                                     i += increment;
                                 } else {
@@ -108,8 +108,15 @@ fn main() -> Result<()> {
                                 )?;
                                 i += increment;
                             }
-                            Widget::Indicator(_) => {
-                                //
+                            Widget::Indicator(n) => {
+                                n.draw_and_update(
+                                    &mut viewport,
+                                    &mut ScreenPos::new(
+                                        horizontal_pos,
+                                        (vertical_pos + i) as u16,
+                                    ),
+                                )?;
+                                i += increment;
                             }
                         }
                     }

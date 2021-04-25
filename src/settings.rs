@@ -50,7 +50,7 @@ impl Seperator {}
 
 #[derive(Debug, Deserialize)]
 pub struct Indicator {
-    title: String,
+    title: Option<String>,
     command: String,
     frequency: u64,
 
@@ -102,6 +102,7 @@ impl Indicator {
 pub struct Meter {
     pub title: String,
     pub unit: String,
+    pub prefix: Option<String>,
 
     max_command: String,
     value_command: String,
@@ -114,8 +115,6 @@ pub struct Meter {
     pub reading: bool,
 
     pub theme: usize,
-
-    pub prefix: Option<String>,
 
     #[serde(skip_deserializing)]
     pub max_value: u64,
@@ -273,6 +272,33 @@ impl Seperator {
     }
 }
 
+impl Indicator {
+    //
+    pub fn draw_and_update(
+        &mut self,
+        viewport: &mut Viewport,
+        pos: &mut ScreenPos,
+    ) -> Result<()> {
+        self.update()?;
+        let colors = match self.value {
+            true => (bg_color(), fg_color()),
+            false => (fg_color(), bg_color()),
+        };
+        if let Some(t) = &self.title {
+            viewport.draw_widget(
+                &Text::new(t, colors.0, colors.1),
+                ScreenPos::new(pos.x, pos.y),
+            );
+        }
+
+        Ok(())
+    }
+}
+
+//-------------------------------------------------------------------------------------
+// Common
+//-------------------------------------------------------------------------------------
+
 fn construct_command(command: &str) -> Option<Command> {
     let mut split = command.split_whitespace();
     let cmd = split.next()?;
@@ -282,6 +308,7 @@ fn construct_command(command: &str) -> Option<Command> {
 
     Some(command)
 }
+
 #[allow(dead_code, clippy::unnecessary_wraps)]
 fn fg_color() -> Option<Color> {
     Some(Color::Green)
