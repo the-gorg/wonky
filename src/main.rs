@@ -41,21 +41,21 @@ fn main() -> Result<()> {
         MeterTheme::default((width / 2 - 2) as u8),
     ];
 
-    let mut positions: [Vec<&mut Element>; 4] =
+    let mut positions: [Vec<&mut dyn Widget>; 4] =
         [vec![], vec![], vec![], vec![]];
     for w in conf.widgets.iter_mut() {
         match w {
             Element::Meter(m) => {
                 m.init()?;
                 m.set_theme(meter_themes[m.theme]);
-                positions[pos_index(m.right, m.bottom)].push(w);
+                positions[pos_index(m.right, m.bottom)].push(m);
             }
             Element::Indicator(i) => {
                 i.init()?;
-                positions[pos_index(i.right, i.bottom)].push(w);
+                positions[pos_index(i.right, i.bottom)].push(i);
             }
             Element::Seperator(s) => {
-                positions[pos_index(s.right, s.bottom)].push(w);
+                positions[pos_index(s.right, s.bottom)].push(s);
             }
         }
     }
@@ -85,46 +85,21 @@ fn main() -> Result<()> {
                     let mut i = 0;
 
                     for thing in positions[n].iter_mut() {
-                        match thing {
-                            Element::Meter(m) => {
-                                m.update_and_draw(
-                                    &mut viewport,
-                                    &mut ScreenPos::new(
-                                        horizontal_pos,
-                                        (vertical_pos + i) as u16,
-                                    ),
-                                )?;
+                        thing.update_and_draw(
+                            &mut viewport,
+                            &mut ScreenPos::new(
+                                horizontal_pos,
+                                (vertical_pos + i) as u16,
+                            ),
+                        )?;
 
-                                // If single-line or not, make prettier?
-                                if !m.reading && m.title.is_none() {
-                                    i += increment;
-                                } else {
-                                    i += increment * 2;
-                                }
-                            }
-                            Element::Seperator(s) => {
-                                s.update_and_draw(
-                                    &mut viewport,
-                                    &mut ScreenPos::new(
-                                        horizontal_pos,
-                                        (vertical_pos + i) as u16,
-                                    ),
-                                )?;
-                                i += increment;
-                            }
-                            Element::Indicator(n) => {
-                                n.update_and_draw(
-                                    &mut viewport,
-                                    &mut ScreenPos::new(
-                                        horizontal_pos,
-                                        (vertical_pos + i) as u16,
-                                    ),
-                                )?;
-                                i += increment;
-                            }
+                        // If single-line or not, make prettier?
+                        if thing.vertical_size() == 1 {
+                            i += increment;
+                        } else {
+                            i += increment * 2;
                         }
                     }
-
                     Ok::<_, anyhow::Error>(())
                 })?;
 
