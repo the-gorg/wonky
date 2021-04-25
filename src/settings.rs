@@ -1,4 +1,4 @@
-use std::{path::PathBuf, process::Command, str::FromStr, time::Instant};
+use std::{process::Command, time::Instant};
 
 use anyhow::{anyhow, Context, Result};
 use directories_next::ProjectDirs;
@@ -22,7 +22,6 @@ pub fn load() -> Result<Conf> {
 }
 
 pub fn load_at_path(path: &str) -> Result<Conf> {
-    let test = PathBuf::from_str(path);
     let buf = std::fs::read(&path)
         .with_context(|| anyhow!("no config file found at: {}", path))?;
 
@@ -100,7 +99,7 @@ impl Indicator {
             if let Some(mut cmd) = construct_command(&self.command) {
                 let output = cmd.get_stdout();
 
-                self.parse_output(output)?;
+                self.parse_output(output);
             }
         }
 
@@ -111,14 +110,14 @@ impl Indicator {
         if let Some(output) =
             construct_command(&self.command).map(|mut cmd| cmd.get_stdout())
         {
-            self.parse_output(output)?;
+            self.parse_output(output);
         }
 
         Ok(())
     }
 
-    fn parse_output(&mut self, output: String) -> Result<()> {
-        let mut split = output.split(",").into_iter();
+    fn parse_output(&mut self, output: String) {
+        let mut split = output.split(',');
 
         self.fg_color = Color::parse_ansi(
             &format!("5;{}", split.next().unwrap_or("0"))[..],
@@ -127,8 +126,6 @@ impl Indicator {
             &format!("5;{}", split.next().unwrap_or("2"))[..],
         );
         self.reading = split.collect();
-
-        Ok(())
     }
 }
 
@@ -192,8 +189,8 @@ impl Default for Meter {
             value_command: vec!["memcheck".to_string()],
             frequency: 1,
             timer: None,
-            value_cmd: construct_command(&vec!["memcheck".to_string()]),
-            max_cmd: construct_command(&vec!["echo 16000".to_string()]),
+            value_cmd: construct_command(&["memcheck".to_string()]),
+            max_cmd: construct_command(&["echo 16000".to_string()]),
             prefix: None,
             theme: 1,
             right: true,
@@ -240,7 +237,7 @@ impl Meter {
 }
 
 //----------------------------------------------------------------------------+
-// Drawing                                                                    |
+// Trait Impl                                                                 |
 //----------------------------------------------------------------------------+
 
 impl Widget for Meter {
@@ -393,7 +390,7 @@ impl Widget for Seperator {
 // Common
 //-------------------------------------------------------------------------------------
 
-fn construct_command(command: &Vec<String>) -> Option<Command> {
+fn construct_command(command: &[String]) -> Option<Command> {
     let mut iter = command.iter();
 
     let mut command = Command::new(iter.next()?);

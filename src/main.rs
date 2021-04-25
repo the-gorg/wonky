@@ -30,7 +30,7 @@ fn main() -> Result<()> {
     let mut viewport =
         Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
 
-    let mut conf = match env::args().skip(1).next() {
+    let mut conf = match env::args().nth(1) {
         None => settings::load()?,
         Some(path) => settings::load_at_path(&path)?,
     };
