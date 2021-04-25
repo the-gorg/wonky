@@ -13,9 +13,8 @@ pub fn load() -> Result<Conf> {
         .context("project directory not found")?
         .config_dir()
         .join("config.toml");
-    let buf = std::fs::read(&config_file).with_context(|| {
-        anyhow!("no config file found at: {}", config_file.display())
-    })?;
+    let buf = std::fs::read(&config_file)
+        .with_context(|| anyhow!("no config file found at: {}", config_file.display()))?;
 
     toml::from_slice(&buf).map_err(Into::into)
 }
@@ -83,9 +82,7 @@ impl Indicator {
     }
 
     pub fn init(&mut self) -> Result<()> {
-        if let Some(output) =
-            construct_command(&self.command).map(|mut cmd| cmd.get_stdout())
-        {
+        if let Some(output) = construct_command(&self.command).map(|mut cmd| cmd.get_stdout()) {
             let mut split = output.split(' ');
 
             if let Some(value) = split.next() {
@@ -216,10 +213,7 @@ impl Meter {
 
         if self.reading {
             let value_reading = Text::new(
-                format!(
-                    "{}/{}{}",
-                    self.current_value, self.max_value, self.unit
-                ),
+                format!("{}/{}{}", self.current_value, self.max_value, self.unit),
                 fg_color(),
                 None,
             );
@@ -228,15 +222,12 @@ impl Meter {
                 &value_reading,
                 ScreenPos::new(
                     // TODO: why 2?!?
-                    pos.x
-                        + (viewport.size.width / 2
-                            - 2
-                            - value_reading.0.len() as u16),
+                    pos.x + (viewport.size.width / 2 - 2 - value_reading.0.len() as u16),
                     pos.y.saturating_sub(1),
                 ),
             );
         }
-        if self.title != "" {
+        if !self.title.is_empty() {
             viewport.draw_widget(
                 &Text::new(self.title.clone(), fg_color(), None),
                 ScreenPos::new(pos.x, pos.y.saturating_sub(1)),
@@ -256,11 +247,7 @@ impl Meter {
 
 impl Seperator {
     //
-    pub fn draw(
-        &mut self,
-        viewport: &mut Viewport,
-        pos: &mut ScreenPos,
-    ) -> Result<()> {
+    pub fn draw(&mut self, viewport: &mut Viewport, pos: &mut ScreenPos) -> Result<()> {
         if let Some(t) = &self.title {
             viewport.draw_widget(
                 &Text::new(t, fg_color(), None),
@@ -274,11 +261,7 @@ impl Seperator {
 
 impl Indicator {
     //
-    pub fn draw_and_update(
-        &mut self,
-        viewport: &mut Viewport,
-        pos: &mut ScreenPos,
-    ) -> Result<()> {
+    pub fn draw_and_update(&mut self, viewport: &mut Viewport, pos: &mut ScreenPos) -> Result<()> {
         self.update()?;
         let colors = match self.value {
             true => (Some(Color::Black), fg_color()),
