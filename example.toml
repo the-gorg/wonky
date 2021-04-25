@@ -1,0 +1,149 @@
+[settings]
+bloatie     = true
+
+#+-------------+
+#|▀            |
+#|             |
+#|  TOP LEFT   |
+#|             |
+#|             |
+#+-------------+
+
+[[widgets]]
+type            = "Meter"
+title           = "I rate"
+theme           = 0
+
+reading         = true
+meter           = true
+
+max_command     = ["echo", "8"] 
+value_command   = ["echo", "8"] 
+
+frequency       = 60
+right           = false
+bottom          = false
+unit            = " m8"
+
+[[widgets]]
+type            = "Meter"
+title           = "Some meter"
+theme           = 0
+
+reading         = true
+meter           = true
+
+max_command     = ["echo", "100"] 
+value_command   = ["echo", "45"] 
+
+frequency       = 60
+right           = false
+bottom          = false
+unit            = ""
+
+[[widgets]]
+type            = "Seperator"
+title           = "Service Status:"
+
+right           = false
+bottom          = false
+
+[[widgets]]
+type            = "Indicator"
+title           = " Server is running "
+
+command         = ["echo", "100,88, Alert! Alert! D:"]
+frequency       = 1
+
+right           = false
+bottom          = false
+
+#+-------------+
+#|             |
+#|             |
+#| BOTTOM LEFT |
+#|             |
+#|▄            |
+#+-------------+
+
+[[widgets]]
+type            = "Meter"
+theme           = 1
+
+reading         = false
+meter           = true
+
+prefix          = "Hours in day "
+max_command     = ["echo", "24"]
+value_command   = ["date", "+%H"] 
+frequency       = 600
+right           = false
+bottom          = true
+unit            = ""
+
+[[widgets]]
+type            = "Meter"
+theme           = 1
+
+reading         = false
+meter           = true
+
+prefix          = "Year "
+max_command     = ["echo", "52"]
+value_command   = ["date", "+%W"] 
+frequency       = 60
+right           = false
+bottom          = true
+unit            = ""
+
+[[widgets]]
+type            = "Meter"
+theme           = 1
+
+reading         = false
+meter           = true
+
+prefix          = "Week "
+max_command     = ["echo", "7"]
+value_command   = ["date", "+%u"] 
+frequency       = 60
+right           = false
+bottom          = true
+unit            = ""
+
+#+-------------+
+#|             |
+#|             |
+#|BOTTOM RIGHT |
+#|             |
+#|            ▄|
+#+-------------+
+
+
+[[widgets]]
+type            = "Meter"
+theme           = 1
+
+reading         = false
+meter           = true
+
+prefix          = "Week "
+max_command     = ["echo", "7"]
+value_command   = ["date", "+%u"] 
+frequency       = 60
+right           = true
+bottom          = true
+unit            = ""
+
+[[widgets]]
+type            = "Seperator"
+title           = "Goes here"
+right           = true
+bottom          = true
+
+[[widgets]]
+type            = "Seperator"
+title           = "Cool stuff:"
+right           = true
+bottom          = true
+
