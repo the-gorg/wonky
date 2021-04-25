@@ -6,6 +6,7 @@
 use anyhow::Result;
 use chrono::{Local, Timelike};
 use rand::Rng;
+use std::env;
 
 use tinybit::events::{
     events, Event, EventModel, KeyCode, KeyEvent, KeyModifiers,
@@ -28,7 +29,10 @@ fn main() -> Result<()> {
     let mut viewport =
         Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
 
-    let mut conf = settings::load()?;
+    let mut conf = match env::args().skip(1).next() {
+        None => settings::load()?,
+        Some(path) => settings::load_at_path(&path)?,
+    };
 
     let mut positions: [Vec<&mut Widget>; 4] = [vec![], vec![], vec![], vec![]];
     for w in conf.widgets.iter_mut() {
