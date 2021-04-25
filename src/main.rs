@@ -60,8 +60,13 @@ fn main() -> Result<()> {
         }
     }
 
-    let mut bloatie = Bloatie::new(width - 6, 0);
-    bloatie.speak("Hello!!");
+    let mut bloatie = if conf.settings.bloatie {
+        let mut bloat = Bloatie::new(width - 6, 0);
+        bloat.speak("Hello!!");
+        Some(bloat)
+    } else {
+        None
+    };
 
     let sleepy_time = 0..7;
 
@@ -83,6 +88,9 @@ fn main() -> Result<()> {
                     let horizontal_pos = if right { width / 2 + 2 } else { 0 };
 
                     let mut i = 0;
+                    if right && !bottom && bloatie.is_some() {
+                        i = 2;
+                    }
 
                     for thing in positions[n].iter_mut() {
                         thing.update_and_draw(
@@ -104,20 +112,18 @@ fn main() -> Result<()> {
                 })?;
 
                 // Character
-                if conf.settings.bloatie {
-                    match bloatie.animation() {
+                if let Some(b) = &mut bloatie {
+                    match b.animation() {
                         Some(_) => {}
                         None => {
                             if sleepy_time.contains(&Local::now().hour()) {
                                 let mut rng = rand::thread_rng();
                                 if rng.gen_range(0..350) == 199 {
-                                    bloatie.play_animation(
+                                    b.play_animation(
                                         BloatieAnimation::sleep_alt(),
                                     );
                                 } else {
-                                    bloatie.play_animation(
-                                        BloatieAnimation::sleep(),
-                                    );
+                                    b.play_animation(BloatieAnimation::sleep());
                                 }
                             } else {
                                 let mut rng = rand::thread_rng();
@@ -125,32 +131,33 @@ fn main() -> Result<()> {
                                     && rng.gen_range(0..100) > 95
                                 {
                                     timer = std::time::Instant::now();
-                                    bloatie.play_animation(
-                                        BloatieAnimation::idle(),
-                                    );
+                                    b.play_animation(BloatieAnimation::idle());
                                 }
                             }
                         }
                     }
-                    bloatie.update(&mut viewport);
+                    b.update(&mut viewport);
                 }
                 renderer.render(&mut viewport);
             }
+
             Event::Key(KeyEvent { code, modifiers }) => match code {
                 KeyCode::Enter | KeyCode::Char('q') => return Ok(()),
                 KeyCode::Char('c') if modifiers == KeyModifiers::CONTROL => {
                     return Ok(())
                 }
-                KeyCode::Char('f') => bloatie.speak("It works!!"),
                 _ => {}
             },
+
             Event::Resize(w, h) => {
                 width = w;
                 height = h;
                 viewport.resize(width, height);
                 renderer.clear();
 
-                bloatie.relocate(width - 6, 0);
+                if let Some(b) = &mut bloatie {
+                    b.relocate(width - 6, 0);
+                }
 
                 for mt in &mut meter_themes {
                     mt.resize((width / 2 - 2) as u8);
