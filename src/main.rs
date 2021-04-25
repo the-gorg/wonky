@@ -43,6 +43,7 @@ fn main() -> Result<()> {
 
     let mut positions: [Vec<&mut dyn Widget>; 4] =
         [vec![], vec![], vec![], vec![]];
+
     for w in conf.widgets.iter_mut() {
         match w {
             Element::Meter(m) => {
@@ -71,6 +72,7 @@ fn main() -> Result<()> {
     let sleepy_time = 0..7;
 
     let mut timer = std::time::Instant::now();
+    let mut resized = false;
 
     for event in events(EventModel::Fps(3)) {
         match event {
@@ -92,17 +94,18 @@ fn main() -> Result<()> {
                         i = 2;
                     }
 
-                    for thing in positions[n].iter_mut() {
-                        thing.update_and_draw(
+                    for widget in positions[n].iter_mut() {
+                        widget.update_and_draw(
                             &mut viewport,
                             &mut ScreenPos::new(
                                 horizontal_pos,
                                 (vertical_pos + i) as u16,
                             ),
+                            &resized,
                         )?;
 
                         // If single-line or not, make prettier?
-                        if thing.vertical_size() == 1 {
+                        if widget.vertical_size() == 1 {
                             i += increment;
                         } else {
                             i += increment * 2;
@@ -110,6 +113,7 @@ fn main() -> Result<()> {
                     }
                     Ok::<_, anyhow::Error>(())
                 })?;
+                resized = false;
 
                 // Character
                 if let Some(b) = &mut bloatie {
@@ -155,12 +159,10 @@ fn main() -> Result<()> {
                 viewport.resize(width, height);
                 renderer.clear();
 
+                resized = true;
+
                 if let Some(b) = &mut bloatie {
                     b.relocate(width - 6, 0);
-                }
-
-                for mt in &mut meter_themes {
-                    mt.resize((width / 2 - 2) as u8);
                 }
             }
         }

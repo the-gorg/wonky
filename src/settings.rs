@@ -38,6 +38,7 @@ pub trait Widget {
         &mut self,
         viewport: &mut Viewport,
         pos: &mut ScreenPos,
+        resized: &bool,
     ) -> Result<()>;
     fn is_bottom(&self) -> bool;
     fn is_right(&self) -> bool;
@@ -245,6 +246,7 @@ impl Widget for Meter {
         &mut self,
         viewport: &mut Viewport,
         pos: &mut ScreenPos,
+        resized: &bool,
     ) -> Result<()> {
         self.update()?;
 
@@ -292,6 +294,10 @@ impl Widget for Meter {
             );
         };
 
+        if *resized {
+            self.meter_theme.resize((viewport.size.width / 2 - 2) as u8)
+        };
+
         self.meter_theme.draw(
             viewport,
             self,
@@ -324,6 +330,7 @@ impl Widget for Indicator {
         &mut self,
         viewport: &mut Viewport,
         pos: &mut ScreenPos,
+        _resized: &bool,
     ) -> Result<()> {
         self.update()?;
 
@@ -362,6 +369,7 @@ impl Widget for Seperator {
         &mut self,
         viewport: &mut Viewport,
         pos: &mut ScreenPos,
+        _resized: &bool,
     ) -> Result<()> {
         if let Some(t) = &self.title {
             viewport.draw_widget(
