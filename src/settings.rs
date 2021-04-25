@@ -51,7 +51,7 @@ impl Seperator {}
 #[derive(Debug, Deserialize)]
 pub struct Indicator {
     title: Option<String>,
-    command: String,
+    command: Vec<String>,
     frequency: u64,
 
     pub right: bool,
@@ -104,8 +104,8 @@ pub struct Meter {
     pub unit: Option<String>,
     pub prefix: Option<String>,
 
-    max_command: String,
-    value_command: String,
+    max_command: Vec<String>,
+    value_command: Vec<String>,
     frequency: u64,
 
     pub right: bool,
@@ -151,12 +151,12 @@ impl Default for Meter {
             unit: Some("mb".to_string()),
             max_value: 0,
             current_value: 0,
-            max_command: "echo 16014".to_string(),
-            value_command: "memcheck".to_string(),
+            max_command: vec!["echo 16014".to_string()],
+            value_command: vec!["memcheck".to_string()],
             frequency: 1,
             timer: None,
-            value_cmd: construct_command("memcheck"),
-            max_cmd: construct_command("echo 16000"),
+            value_cmd: construct_command(&vec!["memcheck".to_string()]),
+            max_cmd: construct_command(&vec!["echo 16000".to_string()]),
             prefix: None,
             theme: 1,
             right: true,
@@ -319,12 +319,11 @@ impl Indicator {
 // Common
 //-------------------------------------------------------------------------------------
 
-fn construct_command(command: &str) -> Option<Command> {
-    let mut split = command.split_whitespace();
-    let cmd = split.next()?;
+fn construct_command(command: &Vec<String>) -> Option<Command> {
+    let mut iter = command.iter();
 
-    let mut command = Command::new(cmd);
-    command.args(split);
+    let mut command = Command::new(iter.next()?);
+    command.args(iter);
 
     Some(command)
 }
