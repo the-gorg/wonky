@@ -36,7 +36,7 @@ fn main() -> Result<()> {
     };
 
     #[allow(unused_variables)]
-    let mut meter_themes = vec![
+    let meter_themes = vec![
         MeterTheme::halfblock((width / 2 - 2) as u8),
         MeterTheme::default((width / 2 - 2) as u8),
     ];
@@ -44,6 +44,8 @@ fn main() -> Result<()> {
     let mut positions: [Vec<&mut dyn Widget>; 4] =
         [vec![], vec![], vec![], vec![]];
 
+    // TODO: Should probably insert bottom aligned Widgets at index 0
+    // to make making designing layouts in config more intuitive.
     for w in conf.widgets.iter_mut() {
         match w {
             Element::Meter(m) => {
