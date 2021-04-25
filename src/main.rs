@@ -93,7 +93,7 @@ fn main() -> Result<()> {
 
                     let mut i = 0;
                     if right && !bottom && bloatie.is_some() {
-                        i = 2;
+                        i = 3;
                     }
 
                     for widget in positions[n].iter_mut() {
