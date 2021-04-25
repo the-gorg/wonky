@@ -7,7 +7,9 @@ use anyhow::Result;
 use chrono::{Local, Timelike};
 use rand::Rng;
 
-use tinybit::events::{events, Event, EventModel, KeyCode, KeyEvent, KeyModifiers};
+use tinybit::events::{
+    events, Event, EventModel, KeyCode, KeyEvent, KeyModifiers,
+};
 use tinybit::render::{Renderer, StdoutTarget};
 use tinybit::{term_size, Color, ScreenPos, ScreenSize, Viewport};
 
@@ -23,7 +25,8 @@ fn main() -> Result<()> {
     let (mut width, mut height) = term_size()?;
     let target = StdoutTarget::new()?;
     let mut renderer = Renderer::new(target);
-    let mut viewport = Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
+    let mut viewport =
+        Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
 
     let mut conf = settings::load()?;
 
@@ -49,13 +52,11 @@ fn main() -> Result<()> {
 
     let sleepy_time = 0..7;
 
-    let mut meter_themes = [
+    #[allow(unused_variables)]
+    let mut meter_themes = vec![
         MeterTheme::halfblock((width / 2 - 2) as u8),
         MeterTheme::default((width / 2 - 2) as u8),
     ];
-    #[allow(unused_variables)]
-    let mut blocky_theme = MeterTheme::default((width / 2 - 2) as u8);
-    let mut normal_theme = MeterTheme::halfblock((width / 2 - 2) as u8);
 
     let mut timer = std::time::Instant::now();
 
@@ -68,8 +69,10 @@ fn main() -> Result<()> {
 
                     let increment = if bottom { -1 } else { 1 };
 
-                    // TODO: Offsets are not great, but it works
-                    let vertical_pos = if bottom { height as i16 - 1 } else { 1 };
+                    // TODO: Offsets are not great, but it works, figure out why
+                    // at some point
+                    let vertical_pos =
+                        if bottom { height as i16 - 1 } else { 0 };
                     let horizontal_pos = if right { width / 2 + 2 } else { 0 };
 
                     let mut i = 0;
@@ -79,12 +82,15 @@ fn main() -> Result<()> {
                             Widget::Meter(m) => {
                                 m.update_and_draw(
                                     &mut viewport,
-                                    &mut ScreenPos::new(horizontal_pos, (vertical_pos + i) as u16),
+                                    &mut ScreenPos::new(
+                                        horizontal_pos,
+                                        (vertical_pos + i) as u16,
+                                    ),
                                     &meter_themes[m.theme],
                                 )?;
 
                                 // If single-line or not, make prettier?
-                                if !m.meter || !m.reading || m.title.is_empty() {
+                                if !m.reading && m.title.is_empty() {
                                     i += increment;
                                 } else {
                                     i += increment * 2;
@@ -93,14 +99,20 @@ fn main() -> Result<()> {
                             Widget::Seperator(s) => {
                                 s.draw(
                                     &mut viewport,
-                                    &mut ScreenPos::new(horizontal_pos, (vertical_pos + i) as u16),
+                                    &mut ScreenPos::new(
+                                        horizontal_pos,
+                                        (vertical_pos + i) as u16,
+                                    ),
                                 )?;
                                 i += increment;
                             }
                             Widget::Indicator(n) => {
                                 n.draw_and_update(
                                     &mut viewport,
-                                    &mut ScreenPos::new(horizontal_pos, (vertical_pos + i) as u16),
+                                    &mut ScreenPos::new(
+                                        horizontal_pos,
+                                        (vertical_pos + i) as u16,
+                                    ),
                                 )?;
                                 i += increment;
                             }
@@ -118,15 +130,23 @@ fn main() -> Result<()> {
                             if sleepy_time.contains(&Local::now().hour()) {
                                 let mut rng = rand::thread_rng();
                                 if rng.gen_range(0..350) == 199 {
-                                    bloatie.play_animation(BloatieAnimation::sleep_alt());
+                                    bloatie.play_animation(
+                                        BloatieAnimation::sleep_alt(),
+                                    );
                                 } else {
-                                    bloatie.play_animation(BloatieAnimation::sleep());
+                                    bloatie.play_animation(
+                                        BloatieAnimation::sleep(),
+                                    );
                                 }
                             } else {
                                 let mut rng = rand::thread_rng();
-                                if timer.elapsed().as_secs() > 10 && rng.gen_range(0..100) > 95 {
+                                if timer.elapsed().as_secs() > 10
+                                    && rng.gen_range(0..100) > 95
+                                {
                                     timer = std::time::Instant::now();
-                                    bloatie.play_animation(BloatieAnimation::idle());
+                                    bloatie.play_animation(
+                                        BloatieAnimation::idle(),
+                                    );
                                 }
                             }
                         }
@@ -137,7 +157,9 @@ fn main() -> Result<()> {
             }
             Event::Key(KeyEvent { code, modifiers }) => match code {
                 KeyCode::Enter | KeyCode::Char('q') => return Ok(()),
-                KeyCode::Char('c') if modifiers == KeyModifiers::CONTROL => return Ok(()),
+                KeyCode::Char('c') if modifiers == KeyModifiers::CONTROL => {
+                    return Ok(())
+                }
                 KeyCode::Char('f') => bloatie.speak("It works!!"),
                 _ => {}
             },
@@ -148,8 +170,6 @@ fn main() -> Result<()> {
                 renderer.clear();
 
                 bloatie.relocate(width - 6, 0);
-                blocky_theme.resize((width / 2 - 2) as u8);
-                normal_theme.resize((width / 2 - 2) as u8);
 
                 for mt in &mut meter_themes {
                     mt.resize((width / 2 - 2) as u8);
