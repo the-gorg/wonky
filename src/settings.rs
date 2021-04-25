@@ -57,6 +57,9 @@ pub struct Indicator {
     pub right: bool,
     pub bottom: bool,
 
+    fg_color: Option<Color>,
+    bg_color: Option<Color>,
+
     #[serde(skip_deserializing)]
     value: bool,
     #[serde(skip_deserializing)]
@@ -75,7 +78,9 @@ impl Indicator {
             self.timer = Some(Instant::now());
 
             if let Some(mut cmd) = construct_command(&self.command) {
-                self.value = cmd.get_stdout().parse()?;
+                let output = cmd.get_stdout();
+
+                self.parse_output(output)?;
             }
         }
 
@@ -86,13 +91,22 @@ impl Indicator {
         if let Some(output) =
             construct_command(&self.command).map(|mut cmd| cmd.get_stdout())
         {
-            let mut split = output.split(' ');
-
-            if let Some(value) = split.next() {
-                self.value = value.parse()?;
-                self.reading = split.collect();
-            }
+            self.parse_output(output)?;
         }
+
+        Ok(())
+    }
+
+    fn parse_output(&mut self, output: String) -> Result<()> {
+        let mut split = output.split(",").into_iter();
+
+        self.fg_color = Color::parse_ansi(
+            &format!("5;{}", split.next().unwrap_or("0"))[..],
+        );
+        self.bg_color = Color::parse_ansi(
+            &format!("5;{}", split.next().unwrap_or("2"))[..],
+        );
+        self.reading = split.collect();
 
         Ok(())
     }
@@ -290,26 +304,20 @@ impl Indicator {
         pos: &mut ScreenPos,
     ) -> Result<()> {
         self.update()?;
-        let colors = match self.value {
-            true => (Some(Color::Black), fg_color()),
-            false => (Some(Color::Black), bg_color()),
-        };
 
         viewport.draw_widget(
             &Text::new(
                 " ".repeat((viewport.size.width / 2 - 2) as usize),
                 None,
-                colors.1,
+                self.bg_color,
             ),
             *pos,
         );
 
-        if let Some(t) = &self.title {
-            viewport.draw_widget(
-                &Text::new(t, colors.0, colors.1),
-                ScreenPos::new(pos.x, pos.y),
-            );
-        }
+        viewport.draw_widget(
+            &Text::new(&self.reading, self.fg_color, self.bg_color),
+            ScreenPos::new(pos.x, pos.y),
+        );
 
         Ok(())
     }
