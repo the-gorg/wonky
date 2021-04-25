@@ -34,11 +34,17 @@ fn main() -> Result<()> {
         Some(path) => settings::load_at_path(&path)?,
     };
 
-    let mut positions: [Vec<&mut Widget>; 4] = [vec![], vec![], vec![], vec![]];
+    #[allow(unused_variables)]
+    let mut meter_themes = vec![
+        MeterTheme::halfblock((width / 2 - 2) as u8),
+        MeterTheme::default((width / 2 - 2) as u8),
+    ];
+
     for w in conf.widgets.iter_mut() {
         match w {
             Widget::Meter(m) => {
                 m.init()?;
+                m.set_theme(meter_themes[m.theme]);
                 positions[pos_index(m.right, m.bottom)].push(w);
             }
             Widget::Seperator(s) => {

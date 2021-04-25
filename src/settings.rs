@@ -186,6 +186,7 @@ impl Default for Meter {
             bottom: false,
             meter: true,
             reading: true,
+            meter_theme: MeterTheme::default(0),
         }
     }
 }
@@ -213,6 +214,10 @@ impl Meter {
         }
 
         Ok(())
+    }
+
+    pub fn set_theme(&mut self, theme: MeterTheme) {
+        self.meter_theme = theme;
     }
 
     pub fn new() -> Self {
@@ -276,7 +281,7 @@ impl Meter {
             );
         };
 
-        theme.draw(
+        self.meter_theme.draw(
             viewport,
             self,
             (self.current_value as f32, self.max_value as f32),
