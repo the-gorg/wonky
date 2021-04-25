@@ -1,4 +1,4 @@
-use std::{process::Command, time::Instant};
+use std::{path::PathBuf, process::Command, str::FromStr, time::Instant};
 
 use anyhow::{anyhow, Context, Result};
 use directories_next::ProjectDirs;
@@ -34,9 +34,19 @@ pub struct Settings {
     pub bloatie: bool,
 }
 
+pub trait Widget {
+    fn update_and_draw(
+        &mut self,
+        viewport: &mut Viewport,
+        pos: &mut ScreenPos,
+    ) -> Result<()>;
+    fn is_bottom(&self) -> bool;
+    fn is_right(&self) -> bool;
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type")]
-pub enum Widget {
+pub enum Element {
     Meter(Meter),
     Indicator(Indicator),
     Seperator(Seperator),
@@ -44,7 +54,7 @@ pub enum Widget {
 
 #[derive(Debug, Deserialize)]
 pub struct Conf {
-    pub widgets: Vec<Widget>,
+    pub widgets: Vec<Element>,
     pub settings: Settings,
 }
 
@@ -145,6 +155,9 @@ pub struct Meter {
     pub current_value: u64,
 
     #[serde(skip_deserializing)]
+    pub meter_theme: MeterTheme,
+
+    #[serde(skip_deserializing)]
     max_cmd: Option<Command>,
     #[serde(skip_deserializing)]
     value_cmd: Option<Command>,
@@ -228,12 +241,12 @@ impl Meter {
 //----------------------------------------------------------------------------+
 // Drawing                                                                    |
 //----------------------------------------------------------------------------+
-impl Meter {
-    pub fn update_and_draw(
+
+impl Widget for Meter {
+    fn update_and_draw(
         &mut self,
         viewport: &mut Viewport,
         pos: &mut ScreenPos,
-        theme: &MeterTheme,
     ) -> Result<()> {
         self.update()?;
 
@@ -290,29 +303,18 @@ impl Meter {
 
         Ok(())
     }
-}
 
-impl Seperator {
-    //
-    pub fn draw(
-        &mut self,
-        viewport: &mut Viewport,
-        pos: &mut ScreenPos,
-    ) -> Result<()> {
-        if let Some(t) = &self.title {
-            viewport.draw_widget(
-                &Text::new(t, fg_color(), None),
-                ScreenPos::new(pos.x, pos.y),
-            );
+    fn is_bottom(&self) -> bool {
+        self.bottom
         }
 
-        Ok(())
+    fn is_right(&self) -> bool {
+        self.right
     }
 }
 
-impl Indicator {
-    //
-    pub fn draw_and_update(
+impl Widget for Indicator {
+    fn update_and_draw(
         &mut self,
         viewport: &mut Viewport,
         pos: &mut ScreenPos,
@@ -334,6 +336,39 @@ impl Indicator {
         );
 
         Ok(())
+    }
+
+    fn is_bottom(&self) -> bool {
+        self.bottom
+    }
+
+    fn is_right(&self) -> bool {
+        self.right
+    }
+}
+
+impl Widget for Seperator {
+    fn update_and_draw(
+        &mut self,
+        viewport: &mut Viewport,
+        pos: &mut ScreenPos,
+    ) -> Result<()> {
+        if let Some(t) = &self.title {
+            viewport.draw_widget(
+                &Text::new(t, fg_color(), None),
+                ScreenPos::new(pos.x, pos.y),
+            );
+        }
+
+        Ok(())
+    }
+
+    fn is_bottom(&self) -> bool {
+        self.bottom
+    }
+
+    fn is_right(&self) -> bool {
+        self.right
     }
 }
 

@@ -1,8 +1,9 @@
 //
-//      █░█░█ █▀█ █▄░█ █▄▀ █▄█
-//      ▀▄▀▄▀ █▄█ █░▀█ █░█ ░█░
+//      █░▄░█ █▀█ █▄░█ █▄▀ █▄█
+//      ▀█▀█▀ █▄█ █░▀█ █░█ ░█░
 // For your terminal monitoring needs
 //
+use crate::settings::Widget;
 use anyhow::Result;
 use chrono::{Local, Timelike};
 use rand::Rng;
@@ -20,7 +21,7 @@ mod settings;
 
 pub use bloatie::{Bloatie, BloatieAnimation};
 pub use meter_theme::MeterTheme;
-pub use settings::{Conf, Widget};
+pub use settings::{Conf, Element};
 
 fn main() -> Result<()> {
     let (mut width, mut height) = term_size()?;
@@ -40,19 +41,21 @@ fn main() -> Result<()> {
         MeterTheme::default((width / 2 - 2) as u8),
     ];
 
+    let mut positions: [Vec<&mut Element>; 4] =
+        [vec![], vec![], vec![], vec![]];
     for w in conf.widgets.iter_mut() {
         match w {
-            Widget::Meter(m) => {
+            Element::Meter(m) => {
                 m.init()?;
                 m.set_theme(meter_themes[m.theme]);
                 positions[pos_index(m.right, m.bottom)].push(w);
             }
-            Widget::Seperator(s) => {
-                positions[pos_index(s.right, s.bottom)].push(w);
-            }
-            Widget::Indicator(i) => {
+            Element::Indicator(i) => {
                 i.init()?;
                 positions[pos_index(i.right, i.bottom)].push(w);
+            }
+            Element::Seperator(s) => {
+                positions[pos_index(s.right, s.bottom)].push(w);
             }
         }
     }
@@ -61,12 +64,6 @@ fn main() -> Result<()> {
     bloatie.speak("Hello!!");
 
     let sleepy_time = 0..7;
-
-    #[allow(unused_variables)]
-    let mut meter_themes = vec![
-        MeterTheme::halfblock((width / 2 - 2) as u8),
-        MeterTheme::default((width / 2 - 2) as u8),
-    ];
 
     let mut timer = std::time::Instant::now();
 
@@ -89,14 +86,13 @@ fn main() -> Result<()> {
 
                     for thing in positions[n].iter_mut() {
                         match thing {
-                            Widget::Meter(m) => {
+                            Element::Meter(m) => {
                                 m.update_and_draw(
                                     &mut viewport,
                                     &mut ScreenPos::new(
                                         horizontal_pos,
                                         (vertical_pos + i) as u16,
                                     ),
-                                    &meter_themes[m.theme],
                                 )?;
 
                                 // If single-line or not, make prettier?
@@ -106,8 +102,8 @@ fn main() -> Result<()> {
                                     i += increment * 2;
                                 }
                             }
-                            Widget::Seperator(s) => {
-                                s.draw(
+                            Element::Seperator(s) => {
+                                s.update_and_draw(
                                     &mut viewport,
                                     &mut ScreenPos::new(
                                         horizontal_pos,
@@ -116,8 +112,8 @@ fn main() -> Result<()> {
                                 )?;
                                 i += increment;
                             }
-                            Widget::Indicator(n) => {
-                                n.draw_and_update(
+                            Element::Indicator(n) => {
+                                n.update_and_draw(
                                     &mut viewport,
                                     &mut ScreenPos::new(
                                         horizontal_pos,
