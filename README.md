@@ -7,10 +7,13 @@
  Monitor and display various things by  reading stdout from 
  scripts or programs.
  
+ ![Screenshot](/media/wonky.png)
+ 
  Currently has 3 component types, indicator, meter and
  seperator.
  
- Meter basic usage:
+ 
+ ##Meter basic usage:
  ```toml
     [[widgets]]
     # Type of widget
@@ -42,7 +45,7 @@
     bottom          = false
  ```
  
- Bash script:
+ ##Bash script:
  ```toml
     [[widgets]]
     type            = "Meter"
