@@ -13,7 +13,7 @@
  seperator.
  
  
- ##Meter basic usage:
+ ## Meter basic usage:
  ```toml
     [[widgets]]
     # Type of widget
@@ -45,7 +45,7 @@
     bottom          = false
  ```
  
- ##Bash script:
+ ## Bash script:
  ```toml
     [[widgets]]
     type            = "Meter"
