@@ -5,13 +5,14 @@
    █▀ ▀█ █▄█ █  █ █▀▄  █   
  Conkys weird terminal cousin
 ```
- Monitor and display various things by  reading stdout from 
- scripts or programs.
+ Monitor and display various things by reading stdout from 
+ scripts or programs. Have a look at the [example.toml](../main/example.toml) to 
+ get started!
  
  ![Screenshot](/media/wonky.png)
  
  Currently has 3 component types, indicator, meter and
- seperator.
+ separator.
  
  
  ## Meter basic usage:
