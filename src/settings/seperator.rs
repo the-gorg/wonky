@@ -5,19 +5,19 @@ use tinybit::{widgets::Text, ScreenPos, Viewport};
 use super::Widget;
 
 #[derive(Debug, Deserialize)]
-pub struct Seperator {
+pub struct Separator {
     pub title: Option<String>,
     pub right: bool,
     pub bottom: bool,
 }
 
-impl Seperator {}
+impl Separator {}
 
 //----------------------------------------------------------------------------+
 // Trait Impl                                                                 |
 //----------------------------------------------------------------------------+
 
-impl Widget for Seperator {
+impl Widget for Separator {
     fn update_and_draw(
         &mut self,
         viewport: &mut Viewport,
