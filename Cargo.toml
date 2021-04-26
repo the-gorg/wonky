@@ -3,6 +3,10 @@ name = "wonky"
 version = "0.1.0"
 authors = ["gorg <gorgmakesthings@gmail.com>"]
 edition = "2018"
+description = "terminal monitoring application"
+license-file = "LICENSE"
+repository = "https://github.com/the-gorg/wonky"
+keywords = ["monitoring"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
