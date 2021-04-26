@@ -1,6 +1,6 @@
 ![CI](https://github.com/the-gorg/wonky/workflows/CI/badge.svg?branch=main)
 ``` 
-   ▄   ▄  
+   ▄   ▄                      (._. )
    █ ▄ █ █▀█ █▀▄█ █ █ █ █   
    █▀ ▀█ █▄█ █  █ █▀▄  █   
  Conkys weird terminal cousin
