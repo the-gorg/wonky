@@ -11,6 +11,9 @@
  
  ![Screenshot](/media/wonky.png)
  
+ ### Installation
+ `cargo install wonky`
+ 
  Currently has 3 component types, indicator, meter and
  separator.
  
