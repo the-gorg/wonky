@@ -42,7 +42,7 @@ bottom          = false
 unit            = ""
 
 [[widgets]]
-type            = "Seperator"
+type            = "Separator"
 title           = "Service Status:"
 
 right           = false
@@ -50,7 +50,6 @@ bottom          = false
 
 [[widgets]]
 type            = "Indicator"
-title           = " Server is running "
 
 command         = ["echo", "100,88, Alert! Alert! D:"]
 frequency       = 1
@@ -136,13 +135,13 @@ bottom          = true
 unit            = ""
 
 [[widgets]]
-type            = "Seperator"
+type            = "Separator"
 title           = "Goes here"
 right           = true
 bottom          = true
 
 [[widgets]]
-type            = "Seperator"
+type            = "Separator"
 title           = "Cool stuff:"
 right           = true
 bottom          = true
