@@ -9,11 +9,13 @@
  scripts or programs. Have a look at the [example.toml](../main/example.toml) to 
  get started!
  
+  ## Installation  
+ ```
+ cargo install wonky
+ ```  
+ 
  ![Screenshot](/media/wonky.png)
- 
- ### Installation
- `cargo install wonky`
- 
+  
  Currently has 3 component types, indicator, meter and
  separator.
  
