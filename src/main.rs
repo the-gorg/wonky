@@ -9,9 +9,7 @@ use chrono::{Local, Timelike};
 use rand::Rng;
 use std::env;
 
-use tinybit::events::{
-    events, Event, EventModel, KeyCode, KeyEvent, KeyModifiers,
-};
+use tinybit::events::{events, Event, EventModel, KeyCode, KeyEvent, KeyModifiers};
 use tinybit::render::{Renderer, StdoutTarget};
 use tinybit::{term_size, Color, ScreenPos, ScreenSize, Viewport};
 
@@ -27,8 +25,7 @@ fn main() -> Result<()> {
     let (mut width, mut height) = term_size()?;
     let target = StdoutTarget::new()?;
     let mut renderer = Renderer::new(target);
-    let mut viewport =
-        Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
+    let mut viewport = Viewport::new(ScreenPos::zero(), ScreenSize::new(width, height));
 
     let mut conf = match env::args().nth(1) {
         None => settings::load()?,
@@ -41,8 +38,7 @@ fn main() -> Result<()> {
         MeterTheme::default((width / 2 - 2) as u8),
     ];
 
-    let mut positions: [Vec<&mut dyn Widget>; 4] =
-        [vec![], vec![], vec![], vec![]];
+    let mut positions: [Vec<&mut dyn Widget>; 4] = [vec![], vec![], vec![], vec![]];
 
     // TODO: Should probably insert bottom aligned Widgets at index 0
     // to make making designing layouts in config more intuitive.
@@ -87,8 +83,7 @@ fn main() -> Result<()> {
 
                     // TODO: Offsets are not great, but it works, figure out why
                     // at some point
-                    let vertical_pos =
-                        if bottom { height as i16 - 1 } else { 0 };
+                    let vertical_pos = if bottom { height as i16 - 1 } else { 0 };
                     let horizontal_pos = if right { width / 2 + 2 } else { 0 };
 
                     let mut i = 0;
@@ -99,10 +94,7 @@ fn main() -> Result<()> {
                     for widget in positions[n].iter_mut() {
                         widget.update_and_draw(
                             &mut viewport,
-                            &mut ScreenPos::new(
-                                horizontal_pos,
-                                (vertical_pos + i) as u16,
-                            ),
+                            &mut ScreenPos::new(horizontal_pos, (vertical_pos + i) as u16),
                             &resized,
                         )?;
 
@@ -125,17 +117,13 @@ fn main() -> Result<()> {
                             if sleepy_time.contains(&Local::now().hour()) {
                                 let mut rng = rand::thread_rng();
                                 if rng.gen_range(0..350) == 199 {
-                                    b.play_animation(
-                                        BloatieAnimation::sleep_alt(),
-                                    );
+                                    b.play_animation(BloatieAnimation::sleep_alt());
                                 } else {
                                     b.play_animation(BloatieAnimation::sleep());
                                 }
                             } else {
                                 let mut rng = rand::thread_rng();
-                                if timer.elapsed().as_secs() > 10
-                                    && rng.gen_range(0..100) > 95
-                                {
+                                if timer.elapsed().as_secs() > 10 && rng.gen_range(0..100) > 95 {
                                     timer = std::time::Instant::now();
                                     b.play_animation(BloatieAnimation::idle());
                                 }
@@ -149,9 +137,7 @@ fn main() -> Result<()> {
 
             Event::Key(KeyEvent { code, modifiers }) => match code {
                 KeyCode::Enter | KeyCode::Char('q') => return Ok(()),
-                KeyCode::Char('c') if modifiers == KeyModifiers::CONTROL => {
-                    return Ok(())
-                }
+                KeyCode::Char('c') if modifiers == KeyModifiers::CONTROL => return Ok(()),
                 _ => {}
             },
 
