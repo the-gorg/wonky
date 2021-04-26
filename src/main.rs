@@ -57,7 +57,7 @@ fn main() -> Result<()> {
                 i.init()?;
                 positions[pos_index(i.right, i.bottom)].push(i);
             }
-            Element::Seperator(s) => {
+            Element::Separator(s) => {
                 positions[pos_index(s.right, s.bottom)].push(s);
             }
         }

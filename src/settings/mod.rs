@@ -6,11 +6,11 @@ use serde::Deserialize;
 use tinybit::{Color, ScreenPos, Viewport};
 
 pub use self::meter::Meter;
-use self::{indicator::Indicator, seperator::Separator};
+use self::{indicator::Indicator, separator::Separator};
 
 mod indicator;
 mod meter;
-mod seperator;
+mod separator;
 
 pub fn load() -> Result<Conf> {
     let config_file = ProjectDirs::from("github", "the-gorg", "wonky")
@@ -56,7 +56,7 @@ pub trait Widget {
 pub enum Element {
     Meter(Meter),
     Indicator(Indicator),
-    Seperator(Separator),
+    Separator(Separator),
 }
 
 #[derive(Deserialize)]
