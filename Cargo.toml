@@ -12,5 +12,5 @@ chrono = "0.4"
 directories-next = "2.0.0"
 rand = "0.8.3"
 serde = { version = "1.0.104", features = ["derive"] }
-tinybit = { git = "https://github.com/togglebyte/tinybit" }
+tinybit = "0.1.1"
 toml = "0.5.8"

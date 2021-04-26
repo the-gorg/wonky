@@ -402,7 +402,8 @@ dependencies = [
 [[package]]
 name = "tinybit"
 version = "0.1.1"
-source = "git+https://github.com/togglebyte/tinybit#d2a219e3d10c613461c3ecadb94a3ab47bb6d874"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f79810e3be11f207a0857e8341dacb6a294e08cc432f8720a0255881c804e07c"
 dependencies = [
  "crossterm",
  "euclid",
