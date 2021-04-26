@@ -18,16 +18,14 @@ pub fn load() -> Result<Conf> {
         .config_dir()
         .join("config.toml");
 
-    let buf = std::fs::read(&config_file).with_context(|| {
-        anyhow!("no config file found at: {}", config_file.display())
-    })?;
+    let buf = std::fs::read(&config_file)
+        .with_context(|| anyhow!("no config file found at: {}", config_file.display()))?;
 
     toml::from_slice(&buf).map_err(Into::into)
 }
 
 pub fn load_at_path(path: &str) -> Result<Conf> {
-    let buf = std::fs::read(&path)
-        .with_context(|| anyhow!("no config file found at: {}", path))?;
+    let buf = std::fs::read(&path).with_context(|| anyhow!("no config file found at: {}", path))?;
 
     toml::from_slice(&buf).map_err(Into::into)
 }
