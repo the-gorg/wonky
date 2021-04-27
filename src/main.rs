@@ -3,6 +3,7 @@
 //      ▀█▀█▀ █▄█ █░▀█ █░█ ░█░
 // For your terminal monitoring needs
 //
+use crate::settings::meter_theme::MeterTheme;
 use crate::settings::Widget;
 use anyhow::Result;
 use chrono::{Local, Timelike};
@@ -14,11 +15,9 @@ use tinybit::render::{Renderer, StdoutTarget};
 use tinybit::{term_size, Color, ScreenPos, ScreenSize, Viewport};
 
 mod bloatie;
-mod meter_theme;
 mod settings;
 
 pub use bloatie::{Bloatie, BloatieAnimation};
-pub use meter_theme::MeterTheme;
 pub use settings::{Conf, Element};
 
 fn main() -> Result<()> {
@@ -32,12 +31,6 @@ fn main() -> Result<()> {
         Some(path) => settings::load_at_path(&path)?,
     };
 
-    #[allow(unused_variables)]
-    let meter_themes = vec![
-        MeterTheme::halfblock((width / 2 - 2) as u8),
-        MeterTheme::default((width / 2 - 2) as u8),
-    ];
-
     let mut positions: [Vec<&mut dyn Widget>; 4] = [vec![], vec![], vec![], vec![]];
 
     // TODO: Should probably insert bottom aligned Widgets at index 0
@@ -46,7 +39,8 @@ fn main() -> Result<()> {
         match w {
             Element::Meter(m) => {
                 m.init()?;
-                m.set_theme(meter_themes[m.theme]);
+                m.theme.resize((width / 2 - 2) as u8);
+                m.theme.init();
                 positions[pos_index(m.right, m.bottom)].push(m);
             }
             Element::Indicator(i) => {
@@ -54,6 +48,7 @@ fn main() -> Result<()> {
                 positions[pos_index(i.right, i.bottom)].push(i);
             }
             Element::Separator(s) => {
+                s.theme.init();
                 positions[pos_index(s.right, s.bottom)].push(s);
             }
         }

@@ -24,15 +24,13 @@ pub struct Meter {
     pub meter: bool,
     pub reading: bool,
 
-    pub theme: usize,
-
     #[serde(skip_deserializing)]
     pub max_value: u64,
     #[serde(skip_deserializing)]
     pub current_value: u64,
 
-    #[serde(skip_deserializing)]
-    pub meter_theme: MeterTheme,
+    #[serde(default)]
+    pub theme: MeterTheme,
 
     #[serde(skip_deserializing)]
     max_cmd: Option<Command>,
@@ -68,7 +66,7 @@ impl Meter {
     }
 
     pub fn set_theme(&mut self, theme: MeterTheme) {
-        self.meter_theme = theme;
+        self.theme = theme;
     }
 
     pub fn new() -> Self {
@@ -94,12 +92,11 @@ impl Default for Meter {
             value_cmd: super::construct_command(&["memcheck".to_string()]),
             max_cmd: super::construct_command(&["echo 16000".to_string()]),
             prefix: None,
-            theme: 1,
             right: true,
             bottom: false,
             meter: true,
             reading: true,
-            meter_theme: MeterTheme::default(0),
+            theme: MeterTheme::default(0),
         }
     }
 }
@@ -126,7 +123,7 @@ impl Widget for Meter {
 
             let value_reading = Text::new(
                 format!("{}/{}{}", self.current_value, self.max_value, unit),
-                super::fg_color(),
+                self.theme.fg_color,
                 None,
             );
 
@@ -149,16 +146,16 @@ impl Widget for Meter {
 
         if let Some(t) = &self.title {
             viewport.draw_widget(
-                &Text::new(t, super::fg_color(), None),
+                &Text::new(t, self.theme.fg_color, None),
                 ScreenPos::new(pos.x, pos.y),
             );
         };
 
         if *resized {
-            self.meter_theme.resize((viewport.size.width / 2 - 2) as u8)
+            self.theme.resize((viewport.size.width / 2 - 2) as u8)
         };
 
-        self.meter_theme.draw(
+        self.theme.draw(
             viewport,
             self,
             (self.current_value as f32, self.max_value as f32),

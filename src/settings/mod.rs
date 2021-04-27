@@ -10,6 +10,7 @@ use self::{indicator::Indicator, separator::Separator};
 
 mod indicator;
 mod meter;
+pub mod meter_theme;
 mod separator;
 
 pub fn load() -> Result<Conf> {
@@ -89,6 +90,13 @@ fn construct_command(command: &[String]) -> Option<Command> {
     command.args(iter);
 
     Some(command)
+}
+
+fn parse_ansi(color_number: Option<u8>) -> Option<Color> {
+    match color_number {
+        Some(n) => Color::parse_ansi(&("5;".to_string() + &n.to_string())[..]),
+        None => None,
+    }
 }
 
 #[allow(dead_code, clippy::unnecessary_wraps)]

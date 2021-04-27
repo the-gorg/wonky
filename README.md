@@ -30,10 +30,21 @@
     # Unit of messurement
     unit            = " m8" 
     
-    # Themes for now:
-    # 0 ▀▀▀▀▀▀▀▀▀▀ 
-    # 1 [====----]
-    theme           = 0
+    ## Theme: (optional) ##
+    # meter character:
+    theme.meter     = "="
+    # meter background character:
+    theme.meter_bg  = "-"
+    # starting character
+    theme.start     = "["
+    # ending character
+    theme.end       = "]"
+    # results in: [====---]
+    
+    # theme colors (ansii 0-255 [link](https://jonasjacek.github.io/colors/))
+    theme.fg       = 10
+    # to have a clear background simply leave theme.bg out of the element
+    theme.bg       = 2
     
     # Text to the left of the bar
     # prefix          = "something"
@@ -91,3 +102,19 @@
     right           = false
     bottom          = false
  ```
+ 
+  ## Separator
+  ### Basic usage:
+ ```toml
+    [[widgets]]
+    type            = "Separator"
+    title           = "Sysinfo:"
+    
+    ## Theme: (optional) ##
+    theme.fg        = 2
+    theme.bg        = 0
+
+    right           = true
+    bottom          = true
+ ```
+ 

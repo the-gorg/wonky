@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::iter;
 
 use tinybit::widgets::Text;
@@ -5,18 +6,33 @@ use tinybit::Color;
 use tinybit::ScreenPos;
 use tinybit::Viewport;
 
+use super::parse_ansi;
 use crate::settings::Meter;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct MeterTheme {
     start: Option<char>,
     end: Option<char>,
     meter: char,
-    meterbg: Option<char>,
+    meter_bg: Option<char>,
+
+    fg: Option<u8>,
+    bg: Option<u8>,
+    #[serde(default)]
+    pub fg_color: Option<Color>,
+    #[serde(default)]
+    pub bg_color: Option<Color>,
+
+    #[serde(skip_deserializing)]
     width: u8,
 }
 
 impl MeterTheme {
+    pub fn init(&mut self) {
+        self.fg_color = parse_ansi(self.fg);
+        self.bg_color = parse_ansi(self.bg);
+    }
+
     pub fn draw(
         &self,
         viewport: &mut Viewport,
@@ -58,16 +74,16 @@ impl MeterTheme {
         viewport.draw_widget(
             &Text::new(
                 format!("{}{}{}{}", prefix, start, clear, end),
-                fg_color(),
+                self.fg_color,
                 None,
             ),
             position,
         );
 
-        if let Some(c) = self.meterbg {
+        if let Some(c) = self.meter_bg {
             let bgbar = iter::repeat(c).take(bar_width as usize).collect::<String>();
             viewport.draw_widget(
-                &Text::new(bgbar, bg_color(), None),
+                &Text::new(bgbar, self.bg_color, None),
                 ScreenPos::new(
                     position.x + self.start.is_some() as u16 + prefix.len() as u16,
                     position.y,
@@ -77,7 +93,7 @@ impl MeterTheme {
 
         // draw meter
         viewport.draw_widget(
-            &Text::new(bar, fg_color(), None),
+            &Text::new(bar, self.fg_color, None),
             ScreenPos::new(
                 position.x + self.start.is_some() as u16 + prefix.len() as u16,
                 position.y,
@@ -95,7 +111,11 @@ impl MeterTheme {
             end: Some(']'),
             meter: '=',
             width,
-            meterbg: Some('-'),
+            meter_bg: Some('-'),
+            fg_color: None,
+            bg_color: None,
+            fg: Some(7),
+            bg: Some(245),
         }
     }
     pub fn halfblock(width: u8) -> Self {
@@ -104,7 +124,11 @@ impl MeterTheme {
             end: None,
             meter: '▀',
             width,
-            meterbg: Some('▀'),
+            meter_bg: Some('▀'),
+            fg_color: None,
+            bg_color: None,
+            fg: Some(0),
+            bg: Some(0),
         }
     }
 }
