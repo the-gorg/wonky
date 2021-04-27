@@ -30,7 +30,7 @@
     # Unit of messurement
     unit            = " m8" 
     
-    ## Theme: ##
+    ## Theme: (optional) ##
     # meter character:
     theme.meter     = "="
     # meter background character:
@@ -109,7 +109,8 @@
     [[widgets]]
     type            = "Separator"
     title           = "Sysinfo:"
-
+    
+    ## Theme: (optional) ##
     theme.fg        = 2
     theme.bg        = 0
 
