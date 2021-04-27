@@ -13,13 +13,16 @@
  ```
  cargo install wonky
  ```  
+ 
   ## Usage  
  ```
  # default config
  wonky
+ 
  # specified config
  wonky [config_name]
  ```  
+ 
  
  ![Screenshot](/media/wonky.png)
   
