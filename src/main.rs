@@ -39,7 +39,8 @@ fn main() -> Result<()> {
         match w {
             Element::Meter(m) => {
                 m.init()?;
-                m.set_theme(meter_themes[m.theme]);
+                m.theme.resize((width / 2 - 2) as u8);
+                m.theme.init();
                 positions[pos_index(m.right, m.bottom)].push(m);
             }
             Element::Indicator(i) => {

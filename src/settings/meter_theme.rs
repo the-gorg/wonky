@@ -12,11 +12,15 @@ pub struct MeterTheme {
     start: Option<char>,
     end: Option<char>,
     meter: char,
-    meterbg: Option<char>,
+    meter_bg: Option<char>,
+    #[serde(skip_deserializing)]
     width: u8,
 }
 
 impl MeterTheme {
+    pub fn init(&mut self) {
+    }
+
     pub fn draw(
         &self,
         viewport: &mut Viewport,
