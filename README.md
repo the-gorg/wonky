@@ -9,13 +9,18 @@
  scripts or programs. Have a look at the [example.toml](../main/example.toml) to 
  get started!
  
- ![Screenshot](/media/wonky.png)
+  ## Installation  
+ ```
+ cargo install wonky
+ ```  
  
+ ![Screenshot](/media/wonky.png)
+  
  Currently has 3 component types, indicator, meter and
  separator.
  
- 
- ## Meter basic usage:
+ ## Meter
+ ### Basic usage:
  ```toml
     [[widgets]]
     # Type of widget
@@ -51,7 +56,7 @@
     bottom          = false
  ```
  
- ## Bash script:
+ ### Bash script:
  ```toml
     [[widgets]]
     type            = "Meter"
@@ -71,4 +76,18 @@
     right           = false
     bottom          = false
  ```
- 
+  ## Indicator
+  ### Basic usage:
+ ```toml
+    [[widgets]]
+    type            = "Indicator"
+    title           = " Server is running "
+    
+    # Indicator output is parsed with comma-separation:
+    # [foreground-color],[background-color],[string]
+    command         = ["echo", "100,88, Alert! Alert! D:"]
+    frequency       = 1
+
+    right           = false
+    bottom          = false
+ ```
