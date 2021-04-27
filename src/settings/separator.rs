@@ -24,7 +24,7 @@ impl Default for SeperatorTheme {
     fn default() -> Self {
         Self {
             fg: Some(7),
-            bg: Some(245),
+            bg: None,
             fg_color: None,
             bg_color: None,
         }
