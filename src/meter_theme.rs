@@ -93,9 +93,9 @@ impl MeterTheme {
         Self {
             start: Some('['),
             end: Some(']'),
-            meter: '▪',
+            meter: '=',
             width,
-            meterbg: Some('□'),
+            meterbg: Some('-'),
         }
     }
     pub fn halfblock(width: u8) -> Self {
