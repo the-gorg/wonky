@@ -48,6 +48,7 @@ fn main() -> Result<()> {
                 positions[pos_index(i.right, i.bottom)].push(i);
             }
             Element::Separator(s) => {
+                s.theme.init();
                 positions[pos_index(s.right, s.bottom)].push(s);
             }
         }

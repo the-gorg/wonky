@@ -92,6 +92,13 @@ fn construct_command(command: &[String]) -> Option<Command> {
     Some(command)
 }
 
+fn parse_ansi(color_number: Option<u8>) -> Option<Color> {
+    match color_number {
+        Some(n) => Color::parse_ansi(&("5;".to_string() + &n.to_string())[..]),
+        None => None,
+    }
+}
+
 #[allow(dead_code, clippy::unnecessary_wraps)]
 fn fg_color() -> Option<Color> {
     Some(Color::Green)
