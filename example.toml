@@ -12,7 +12,6 @@ bloatie     = true
 [[widgets]]
 type            = "Meter"
 title           = "I rate"
-theme           = 0
 
 reading         = true
 meter           = true
@@ -28,7 +27,6 @@ unit            = " m8"
 [[widgets]]
 type            = "Meter"
 title           = "Some meter"
-theme           = 0
 
 reading         = true
 meter           = true
@@ -67,7 +65,6 @@ bottom          = false
 
 [[widgets]]
 type            = "Meter"
-theme           = 1
 
 reading         = false
 meter           = true
@@ -82,7 +79,6 @@ unit            = ""
 
 [[widgets]]
 type            = "Meter"
-theme           = 1
 
 reading         = false
 meter           = true
@@ -97,7 +93,6 @@ unit            = ""
 
 [[widgets]]
 type            = "Meter"
-theme           = 1
 
 reading         = false
 meter           = true
@@ -121,7 +116,6 @@ unit            = ""
 
 [[widgets]]
 type            = "Meter"
-theme           = 1
 
 reading         = false
 meter           = true
