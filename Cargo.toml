@@ -1,6 +1,6 @@
 [package]
 name = "wonky"
-version = "0.1.1"
+version = "1.0.0"
 authors = ["gorg <gorgmakesthings@gmail.com>"]
 edition = "2018"
 description = "terminal monitoring application"
