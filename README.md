@@ -24,6 +24,10 @@
     
     # Unit of messurement
     unit            = " m8" 
+    
+    # Themes for now:
+    # 0 ▀▀▀▀▀▀▀▀▀▀ 
+    # 1 [====----]
     theme           = 0
     
     # Text to the left of the bar
