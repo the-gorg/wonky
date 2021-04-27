@@ -123,7 +123,7 @@ impl Widget for Meter {
 
             let value_reading = Text::new(
                 format!("{}/{}{}", self.current_value, self.max_value, unit),
-                super::fg_color(),
+                self.theme.fg_color,
                 None,
             );
 
@@ -146,7 +146,7 @@ impl Widget for Meter {
 
         if let Some(t) = &self.title {
             viewport.draw_widget(
-                &Text::new(t, super::fg_color(), None),
+                &Text::new(t, self.theme.fg_color, None),
                 ScreenPos::new(pos.x, pos.y),
             );
         };
