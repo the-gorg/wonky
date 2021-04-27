@@ -10,6 +10,7 @@ use self::{indicator::Indicator, separator::Separator};
 
 mod indicator;
 mod meter;
+pub mod meter_theme;
 mod separator;
 
 pub fn load() -> Result<Conf> {

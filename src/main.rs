@@ -3,6 +3,7 @@
 //      ▀█▀█▀ █▄█ █░▀█ █░█ ░█░
 // For your terminal monitoring needs
 //
+use crate::settings::meter_theme::MeterTheme;
 use crate::settings::Widget;
 use anyhow::Result;
 use chrono::{Local, Timelike};
@@ -14,11 +15,9 @@ use tinybit::render::{Renderer, StdoutTarget};
 use tinybit::{term_size, Color, ScreenPos, ScreenSize, Viewport};
 
 mod bloatie;
-mod meter_theme;
 mod settings;
 
 pub use bloatie::{Bloatie, BloatieAnimation};
-pub use meter_theme::MeterTheme;
 pub use settings::{Conf, Element};
 
 fn main() -> Result<()> {
@@ -31,12 +30,6 @@ fn main() -> Result<()> {
         None => settings::load()?,
         Some(path) => settings::load_at_path(&path)?,
     };
-
-    #[allow(unused_variables)]
-    let meter_themes = vec![
-        MeterTheme::halfblock((width / 2 - 2) as u8),
-        MeterTheme::default((width / 2 - 2) as u8),
-    ];
 
     let mut positions: [Vec<&mut dyn Widget>; 4] = [vec![], vec![], vec![], vec![]];
 
