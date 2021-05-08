@@ -6,7 +6,8 @@ edition = "2018"
 description = "terminal monitoring application"
 license-file = "LICENSE"
 repository = "https://github.com/the-gorg/wonky"
-keywords = ["monitoring", "command line utilities", "visualization"]
+categories = ["monitoring", "command-line-utilities", "visualization"]
+keywords = ["monitoring", "visualization", "terminal"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
