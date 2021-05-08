@@ -62,12 +62,14 @@ fn main() -> Result<()> {
         None
     };
 
+    let fps = if bloatie.is_some() { 3 } else { 1 };
+
     let sleepy_time = 0..7;
 
     let mut timer = std::time::Instant::now();
     let mut resized = false;
 
-    for event in events(EventModel::Fps(3)) {
+    for event in events(EventModel::Fps(fps)) {
         match event {
             Event::Tick => {
                 (0..4).try_for_each(|n| {
@@ -153,6 +155,7 @@ fn main() -> Result<()> {
 
     Ok(())
 }
+
 #[allow(dead_code, clippy::unnecessary_wraps)]
 fn fg_color() -> Option<Color> {
     Some(Color::Green)
