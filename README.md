@@ -1,4 +1,6 @@
 ![CI](https://github.com/the-gorg/wonky/workflows/CI/badge.svg?branch=main)
+[![Crate download count](https://flat.badgen.net/crates/d/wonky)](https://crates.io/crates/wonky)
+
 ``` 
    ▄   ▄                      (._. )
    █ ▄ █ █▀█ █▀▄█ █ █ █ █   
